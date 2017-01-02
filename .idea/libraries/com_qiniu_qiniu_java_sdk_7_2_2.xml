@@ -1,0 +1,18 @@
+<component name="libraryTable">
+  <library name="com.qiniu:qiniu-java-sdk:7.2.2" type="repository">
+    <properties maven-id="com.qiniu:qiniu-java-sdk:7.2.2" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/qiniu-java-sdk-7.2.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/okhttp-3.3.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/okio-1.8.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/gson-2.6.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/happy-dns-java-0.1.4.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/lib/qiniu-java-sdk-7.2.2-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/lib/qiniu-java-sdk-7.2.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
