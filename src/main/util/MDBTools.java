@@ -3,10 +3,7 @@ package main.util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.MongoClient;
+import com.mongodb.*;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -33,12 +30,17 @@ import java.util.*;
  */
 public class MDBTools {
     //private static final MongoClient mongoClient = new MongoClient("114.215.124.13", 27017);
-    private static final MongoClient mongoClient = new MongoClient("127.0.0.1", 27017);
+    //private static final MongoClient mongoClient = new MongoClient("127.0.0.1", 27017);
+    private static   MongoCredential credential = MongoCredential.createScramSha1Credential("halfman","lizhi","halfman21".toCharArray());
+    private static    MongoClient mongoClient = new MongoClient(new ServerAddress("boteteam.com", 27017),Arrays.asList(credential));
     private MongoDatabase mongoDatabase;
     private MongoCollection<Document> mongoCollection = null;
 
 
     public MDBTools() {
+
+//        credential = MongoCredential.createScramSha1Credential("halfman","lizhi","halfman21".toCharArray());
+//        mongoClient = new MongoClient(new ServerAddress("boteteam.com", 27017),Arrays.asList(credential));
         mongoDatabase = mongoClient.getDatabase("lizhi");
     }
 
@@ -107,6 +109,8 @@ public class MDBTools {
         mongoCollection.insertOne(Document.parse(json));
 
     }
+
+
 
     public  void updateSubject(Subject subject){
         mongoCollection=mongoDatabase.getCollection("subjects");
@@ -219,6 +223,17 @@ public class MDBTools {
        Gson gson=new GsonBuilder().create();
 
         gradeClass=gson.fromJson(document.toJson(),GradeClass.class);
+
+        return gradeClass;
+    }
+
+    public GradeClass getGradeClassByName(String classname){
+        GradeClass gradeClass;
+        mongoCollection=mongoDatabase.getCollection("classes");
+        Document document=mongoCollection.find(Filters.eq("Name",classname)).first();
+        Gson gson=new GsonBuilder().create();
+        gradeClass=gson.fromJson(document.toJson(),GradeClass.class);
+
 
         return gradeClass;
     }
@@ -396,7 +411,21 @@ public class MDBTools {
 
     }
 
+    public boolean addFakePhoto(Photopic photopic,String timeStamp) {
+        mongoCollection=mongoDatabase.getCollection("photos");
+        Gson gson=new GsonBuilder().create();
 
+
+            photopic.setPhotopreview(null);
+            photopic.setPhotofile(null);
+            photopic.setPicname(timeStamp);
+            mongoCollection.findOneAndDelete(Filters.eq("picname",photopic.getPicname()));
+            mongoCollection.insertOne(Document.parse(gson.toJson(photopic)));
+
+
+        return true;
+
+    }
 
     public List<PicPinAction> getPicpinactions(Photopic photopic)
     {

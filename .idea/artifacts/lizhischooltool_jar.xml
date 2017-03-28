@@ -1,0 +1,18 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="lizhischooltool:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/lizhischooltool_jar</output-path>
+    <root id="archive" name="lizhischooltool.jar">
+      <element id="module-output" name="lizhischooltool" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/mongodb-driver-3.4.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/mongodb-driver-core-3.4.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/bson-3.4.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/qiniu-java-sdk-7.2.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/okhttp-3.3.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/okio-1.8.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/gson-2.6.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/happy-dns-java-0.1.4.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jxl-2.6.12.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/log4j-1.2.14.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

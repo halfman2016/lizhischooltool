@@ -78,6 +78,9 @@ public class Subject  {
     public UUID get_id() {
         return _id;
     }
+    public void set_id(UUID uuid){
+        _id=uuid;
+        }
 
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
