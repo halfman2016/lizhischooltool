@@ -4,6 +4,7 @@
 
 package main.view;
 
+import java.beans.*;
 import javax.swing.event.*;
 import com.qiniu.common.QiniuException;
 import com.qiniu.common.Zone;
@@ -16,9 +17,15 @@ import com.qiniu.util.Auth;
 import jxl.Cell;
 import jxl.Sheet;
 import jxl.Workbook;
+import jxl.format.Colour;
+import jxl.format.UnderlineStyle;
 import jxl.read.biff.BiffException;
+import jxl.write.*;
+import jxl.write.Label;
+import jxl.write.biff.RowsExceededException;
 import main.Module.*;
 import main.util.MDBTools;
+import main.util.MySqlTools;
 import main.util.Utils;
 
 import java.awt.*;
@@ -48,6 +55,7 @@ public class SwingMain extends JFrame {
     Vector subname=new Vector();
     ArrayList<Subject> subjects;
     ArrayList<Teacher> teachers;
+    String timelabel;
 
     String filePath="";
     public SwingMain() {
@@ -74,26 +82,26 @@ public class SwingMain extends JFrame {
                 Workbook workbook = Workbook.getWorkbook(new File(path));
                 Sheet sheet = workbook.getSheet(0);
 
-                for (int i = 0; i < sheet.getColumns(); i++) {
+                for (int i = 1; i < sheet.getColumns(); i++) {
                     Cell[] cells = sheet.getColumn(i);
-                    GradeClass gradeClass = new GradeClass(cells[0].getContents());
+                    GradeClass gradeClass = new GradeClass(cells[1].getContents());
                     java.util.List<Student> stus = new ArrayList<Student>();
                     System.out.print("cells has " + cells.length);
 
-                    for (int j = 1; j < cells.length; j++) {
+                    for (int j = 2; j < cells.length; j++) {
                         Cell cell1 = sheet.getCell(i, j);
                         Student stu = new Student(cells[j].getContents());
                         stu.setGradeclass(gradeClass.getName());
                         stu.setGradeclassid(gradeClass.get_id());
                         stu.setPwd("123456");
-                        mdb.addStu(stu);
+                      mdb.addStu(stu);
                         stus.add(stu);
 
                         System.out.print(cell1.getContents());
                     }
 
                     gradeClass.setStus(stus);
-                    mdb.saveGradeClass(gradeClass);
+                 mdb.saveGradeClass(gradeClass);
 
                 }
 
@@ -307,6 +315,10 @@ public class SwingMain extends JFrame {
             System.out.print(temp.getName());
         }
         list2.setListData(listname);
+
+
+
+
     }
 
     private void list2ValueChanged(ListSelectionEvent e) {
@@ -316,11 +328,22 @@ public class SwingMain extends JFrame {
         Icon icon;
         String url="http://lizhibutian.boteteam.com/" + listname.get(list2.getSelectedIndex());
             //icon=new ImageIcon(new URL(url));
-            icon=new ImageIcon("D:\\1newbote\\lizhi\\serverpic"+File.separator+listname.get(list2.getSelectedIndex())+".jpeg");
+          //  icon=new ImageIcon("D:\\1newbote\\lizhi\\serverpic"+File.separator+listname.get(list2.getSelectedIndex())+".jpeg");
+           icon=new ImageIcon(filePath+File.separator+listname.get(list2.getSelectedIndex())+".jpeg");
             labelimage.setIcon(icon);
 
         txtPicDateTime.setText(listname.get(list2.getSelectedIndex()).toString());
+        SimpleDateFormat sdf=new SimpleDateFormat("yyMMdd_HHmmssSSS");
+        try {
+            Date date=sdf.parse(listname.get(list2.getSelectedIndex()).toString());
+            sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            txtPicDateTime.setText(sdf.format(date));
+        } catch (ParseException e1) {
+            e1.printStackTrace();
+        }
 
+
+        timelabel=listname.get(list2.getSelectedIndex()).toString();
 
 
     }
@@ -362,6 +385,8 @@ public class SwingMain extends JFrame {
 
         } catch (ParseException e1) {
             e1.printStackTrace();
+            JOptionPane.showMessageDialog(this,"日期格式不对");
+            return;
         }
 
         mdb.saveSubject(subject);
@@ -380,33 +405,14 @@ public class SwingMain extends JFrame {
 
         } catch (ParseException e1) {
             e1.printStackTrace();
+            JOptionPane.showMessageDialog(this,"日期格式不对");
+            return;
+
         }
 
         mdb.updateSubject(subject);    }
 
         private void tabbedPane1StateChanged(ChangeEvent e) {
-            // 图片编辑切换
-            String timeStamp = new SimpleDateFormat("yyMMdd_HHmmssSSS").format(new Date());
-            txtPicDateTime.setText(timeStamp);
-
-
-            //装载teaname
-
-            teachers=mdb.getTeas();
-            for(Teacher tea:teachers)
-            {
-                teaname.add(tea.getName());
-            }
-            listTeaName.setListData(teaname);
-
-            subjects=mdb.getSubjects();
-
-            subname.add("无专题");
-            for(Subject sub:subjects)
-            {
-                subname.add(sub.getSubjectName());
-            }
-            listSub.setListData(subname);
 
 
 
@@ -443,7 +449,7 @@ public class SwingMain extends JFrame {
 
                 photopic.setPhotoauthor(author.getName());
                 photopic.setPhotoauthorid(author.get_id());
-                SimpleDateFormat sdf=new SimpleDateFormat("yyMMdd_HHmmssSSS");
+                SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 try {
                     photopic.setPhotodate(sdf.parse(txtPicDateTime.getText()));
                 } catch (ParseException e1) {
@@ -452,7 +458,7 @@ public class SwingMain extends JFrame {
 
                 photopic.setPhotomemo(txtPicMemo.getText());
 
-                mdb.addFakePhoto(photopic,txtPicDateTime.getText());
+                mdb.addFakePhoto(photopic,timelabel);
 
 
             }
@@ -473,8 +479,248 @@ public class SwingMain extends JFrame {
             }
         }
 
+        private void panel3PropertyChange(PropertyChangeEvent e) {
+            // TODO add your code here
+
+            // 加载专题和老师姓名
+
+            // 图片编辑切换
+            String timeStamp = new SimpleDateFormat("yyMMdd_HHmmssSSS").format(new Date());
+            txtPicDateTime.setText(timeStamp);
 
 
+            //装载teaname
+
+            teachers=mdb.getTeas();
+            for(Teacher tea:teachers)
+            {
+                teaname.add(tea.getName());
+            }
+            listTeaName.setListData(teaname);
+
+            subjects=mdb.getSubjects();
+            subname.clear();
+            subname.add("无专题");
+            for(Subject sub:subjects)
+            {
+                subname.add(sub.getSubjectName());
+            }
+            listSub.setListData(subname);
+        }
+
+        private void button9ActionPerformed(ActionEvent e) {
+            // 学生账号导出excel
+            ArrayList <Student>stus=mdb.getStus();
+            File file=new File("stuout.xls");
+
+            try {
+                WritableWorkbook workbook=Workbook.createWorkbook(file);
+                WritableSheet sheet=workbook.createSheet("学生名单",0);
+                jxl.write.Label label=new Label(0,0,"班级");
+
+                sheet.addCell(label);
+                label=new Label(1,0,"姓名");
+                sheet.addCell(label);
+                label=new Label(2,0,"密码");
+                sheet.addCell(label);
+                int i=1;
+                for (Student stu:stus)
+                {
+                    label=new Label(0,i,stu.getGradeclass());
+                    sheet.addCell(label);
+                    label=new Label(1,i,stu.getName());
+                    sheet.addCell(label);
+                    label=new Label(2,i,stu.getPwd());
+                    sheet.addCell(label);
+
+                    i=i+1;
+
+                }
+                workbook.write();
+                workbook.close();
+
+
+            } catch (IOException e1) {
+
+                e1.printStackTrace();
+            } catch (RowsExceededException e1) {
+                e1.printStackTrace();
+            } catch (WriteException e1) {
+                e1.printStackTrace();
+            }
+
+
+
+        }
+
+        private void button10ActionPerformed(ActionEvent e) {
+            // 教师账号导出EXCEL
+
+            ArrayList <Teacher>teas=mdb.getTeas();
+            File file=new File("teaout.xls");
+
+            try {
+                WritableWorkbook workbook=Workbook.createWorkbook(file);
+                WritableSheet sheet=workbook.createSheet("教师名单",0);
+                jxl.write.Label label=new Label(0,0,"班级");
+
+                sheet.addCell(label);
+                label=new Label(1,0,"姓名");
+                sheet.addCell(label);
+                label=new Label(2,0,"登录名");
+                sheet.addCell(label);
+                label=new Label(3,0,"密码");
+                sheet.addCell(label);
+                int i=1;
+                for (Teacher tea:teas)
+                {
+                    label=new Label(0,i,tea.getOnDutyGradeClassName());
+                    sheet.addCell(label);
+                    label=new Label(1,i,tea.getName());
+                    sheet.addCell(label);
+                    label=new Label(2,i,tea.getTid());
+                    sheet.addCell(label);
+                    label=new Label(3,i,tea.getPwd());
+                    sheet.addCell(label);
+
+                    i=i+1;
+
+                }
+                workbook.write();
+                workbook.close();
+
+
+            } catch (IOException e1) {
+
+                e1.printStackTrace();
+            } catch (RowsExceededException e1) {
+                e1.printStackTrace();
+            } catch (WriteException e1) {
+                e1.printStackTrace();
+            }
+
+        }
+
+        private void button11ActionPerformed(ActionEvent e) {
+            // TODO add your code here 罗立新 t37  赵艳然 t38
+            Teacher luotea=new Teacher("罗立新");
+            luotea.setDutytitle("校长");
+            luotea.setOnDutyGradeClassId(UUID.fromString("980c1244-ebe9-4740-8a3b-959148e2e8f3"));
+            luotea.setOnDutyGradeClassName("八1班");
+            luotea.setPwd("123123");
+            mdb.addTea(luotea);
+
+            Teacher zhaotea=new Teacher("赵艳然");
+            zhaotea.setDutytitle("书记");
+            zhaotea.setOnDutyGradeClassId(UUID.fromString("980c1244-ebe9-4740-8a3b-959148e2e8f3"));
+            zhaotea.setOnDutyGradeClassName("八1班");
+            zhaotea.setPwd("123123");
+
+            mdb.addTea(zhaotea);
+        }
+
+        private void button12ActionPerformed(ActionEvent e) throws WriteException, IOException {
+            // 输出统计xls
+            MySqlTools mySqlTools=new MySqlTools();
+            mySqlTools.getConn();
+            List<Log> logs=mySqlTools.queryLogTea();
+            List<LogAction> logActions=mySqlTools.queryLogAction();
+//            FileNameExtensionFilter filter=new FileNameExtensionFilter("*.xls","xls");
+//            JFileChooser chooser=new JFileChooser();
+            SimpleDateFormat df=new SimpleDateFormat("YYMMdd");
+            String date=df.format(new Date());
+//            chooser.setSelectedFile(new File("情况输出"+date+".xls"));
+//            chooser.setFileFilter(filter);
+//            chooser.setMultiSelectionEnabled(false);
+
+          //  int result=chooser.showSaveDialog(this);
+           // if(result==JFileChooser.APPROVE_OPTION) {
+              //  File file = chooser.getSelectedFile();
+            File file=new File("情况输出"+date+".xls");
+                if (!file.getPath().endsWith(".xls")) {
+                    file = new File(file.getPath() + ".xls");
+                }
+
+                WritableWorkbook workbook = null;
+                try {
+                    workbook = Workbook.createWorkbook(file);
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+                WritableSheet sheet = workbook.createSheet("教师登录软件情况表", 0);
+                jxl.write.Label label = new Label(0, 0, "账号");
+                try {
+                    sheet.addCell(label);
+                } catch (WriteException e1) {
+                    e1.printStackTrace();
+                }
+                label = new Label(1, 0, "登录时间");
+                sheet.addCell(label);
+                label = new Label(2, 0, "结束时间");
+                sheet.addCell(label);
+                label = new Label(3, 0, "时长（秒）");
+                sheet.addCell(label);
+                label = new Label(4, 0, "姓名");
+                sheet.addCell(label);
+                label = new Label(5, 0, "班级");
+                sheet.addCell(label);
+                int i = 1;
+                for (Log log : logs) {
+                    label = new Label(0, i, log.getLid());
+                    sheet.addCell(label);
+                    label = new Label(1, i, log.getStime().toString());
+                    sheet.addCell(label);
+                    label = new Label(2, i, log.getEtime().toString());
+                    sheet.addCell(label);
+                    label = new Label(3, i,(String.valueOf(log.getDtime()/1000)) );
+                    sheet.addCell(label);
+                    label = new Label(4, i, log.getLname());
+                    sheet.addCell(label);
+                    label = new Label(5, i, log.getgradeClassName());
+                    sheet.addCell(label);
+
+                    i = i + 1;
+
+                }
+
+                WritableSheet sheet1 = workbook.createSheet("教师使用软件情况表", 1);
+                jxl.write.Label label1 = new Label(0, 0, "账号");
+                try {
+                    sheet1.addCell(label1);
+                } catch (WriteException e1) {
+                    e1.printStackTrace();
+                }
+                label1 = new Label(1, 0, "姓名");
+                sheet1.addCell(label1);
+                label1 = new Label(2, 0, "行为内容");
+                sheet1.addCell(label1);
+                label1 = new Label(3, 0, "行为时间");
+                sheet1.addCell(label1);
+                label1 = new Label(4, 0, "班级");
+                sheet1.addCell(label1);
+
+                int ii = 1;
+                for (LogAction log :logActions ) {
+                    label1 = new Label(0, ii, log.getActionpeopleid());
+                    sheet1.addCell(label1);
+                    label1 = new Label(1, ii, log.getActionpeoplename());
+                    sheet1.addCell(label1);
+                    label1 = new Label(2, ii, log.getActionname());
+                    sheet1.addCell(label1);
+                    label1 = new Label(3, ii,log.getActiontime().toString());
+                    sheet1.addCell(label1);
+                    label1 = new Label(4, ii, log.getActiongradeclassname());
+                    sheet1.addCell(label1);
+
+
+                    ii = ii + 1;
+
+                }
+
+                workbook.write();
+                workbook.close();
+
+            }
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
@@ -483,6 +729,9 @@ public class SwingMain extends JFrame {
         button2 = new JButton();
         button3 = new JButton();
         label1 = new JLabel();
+        button9 = new JButton();
+        button10 = new JButton();
+        button11 = new JButton();
         panel2 = new JPanel();
         panel3 = new JPanel();
         button1 = new JButton();
@@ -517,6 +766,8 @@ public class SwingMain extends JFrame {
         modSub = new JButton();
         scrollPane5 = new JScrollPane();
         txtSubInfo = new JTextPane();
+        panel7 = new JPanel();
+        out = new JButton();
 
         //======== this ========
         addWindowListener(new WindowAdapter() {
@@ -529,7 +780,6 @@ public class SwingMain extends JFrame {
 
         //======== tabbedPane1 ========
         {
-            tabbedPane1.addChangeListener(e -> tabbedPane1StateChanged(e));
 
             //======== panel1 ========
             {
@@ -547,18 +797,40 @@ public class SwingMain extends JFrame {
                 //---- label1 ----
                 label1.setText("--\u300b");
 
+                //---- button9 ----
+                button9.setText("\u5bfc\u51fa\u5b66\u751f\u540d\u5355\u8d26\u53f7");
+                button9.addActionListener(e -> button9ActionPerformed(e));
+
+                //---- button10 ----
+                button10.setText("\u5bfc\u51fa\u6559\u5e08\u540d\u5355\u8d26\u53f7");
+                button10.addActionListener(e -> button10ActionPerformed(e));
+
+                //---- button11 ----
+                button11.setText("addtea");
+                button11.setEnabled(false);
+                button11.addActionListener(e -> button11ActionPerformed(e));
+
                 GroupLayout panel1Layout = new GroupLayout(panel1);
                 panel1.setLayout(panel1Layout);
                 panel1Layout.setHorizontalGroup(
                     panel1Layout.createParallelGroup()
                         .addGroup(panel1Layout.createSequentialGroup()
-                            .addContainerGap()
-                            .addComponent(button2)
-                            .addGap(5, 5, 5)
-                            .addComponent(label1)
-                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(button3)
-                            .addContainerGap(721, Short.MAX_VALUE))
+                            .addGroup(panel1Layout.createParallelGroup()
+                                .addGroup(panel1Layout.createSequentialGroup()
+                                    .addContainerGap()
+                                    .addComponent(button2)
+                                    .addGap(5, 5, 5)
+                                    .addComponent(label1)
+                                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(button3))
+                                .addGroup(panel1Layout.createSequentialGroup()
+                                    .addGap(29, 29, 29)
+                                    .addComponent(button9)
+                                    .addGap(38, 38, 38)
+                                    .addComponent(button10)
+                                    .addGap(80, 80, 80)
+                                    .addComponent(button11)))
+                            .addContainerGap(532, Short.MAX_VALUE))
                 );
                 panel1Layout.setVerticalGroup(
                     panel1Layout.createParallelGroup()
@@ -567,7 +839,12 @@ public class SwingMain extends JFrame {
                                 .addComponent(button3)
                                 .addComponent(button2)
                                 .addComponent(label1))
-                            .addGap(0, 473, Short.MAX_VALUE))
+                            .addGap(86, 86, 86)
+                            .addGroup(panel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                .addComponent(button9)
+                                .addComponent(button10)
+                                .addComponent(button11))
+                            .addGap(0, 429, Short.MAX_VALUE))
                 );
             }
             tabbedPane1.addTab("\u4eba\u5458\u73ed\u7ea7", panel1);
@@ -583,13 +860,14 @@ public class SwingMain extends JFrame {
                 );
                 panel2Layout.setVerticalGroup(
                     panel2Layout.createParallelGroup()
-                        .addGap(0, 506, Short.MAX_VALUE)
+                        .addGap(0, 581, Short.MAX_VALUE)
                 );
             }
             tabbedPane1.addTab("\u6559\u5e08\u914d\u7f6e", panel2);
 
             //======== panel3 ========
             {
+                panel3.addPropertyChangeListener(e -> panel3PropertyChange(e));
 
                 //---- button1 ----
                 button1.setText("\u52a0\u8f7d\u56fe\u7247");
@@ -669,7 +947,7 @@ public class SwingMain extends JFrame {
                                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                     .addComponent(scrollPane7)
                                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(scrollPane8, GroupLayout.DEFAULT_SIZE, 147, Short.MAX_VALUE))
+                                    .addComponent(scrollPane8, GroupLayout.DEFAULT_SIZE, 221, Short.MAX_VALUE))
                                 .addGroup(panel3Layout.createSequentialGroup()
                                     .addContainerGap()
                                     .addGroup(panel3Layout.createParallelGroup()
@@ -678,9 +956,9 @@ public class SwingMain extends JFrame {
                                                 .addComponent(button1)
                                                 .addComponent(button8))
                                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                            .addComponent(scrollPane2, GroupLayout.DEFAULT_SIZE, 455, Short.MAX_VALUE))
+                                            .addComponent(scrollPane2, GroupLayout.DEFAULT_SIZE, 530, Short.MAX_VALUE))
                                         .addGroup(panel3Layout.createSequentialGroup()
-                                            .addComponent(scrollPane3, GroupLayout.DEFAULT_SIZE, 445, Short.MAX_VALUE)
+                                            .addComponent(scrollPane3, GroupLayout.DEFAULT_SIZE, 520, Short.MAX_VALUE)
                                             .addGap(16, 16, 16)
                                             .addGroup(panel3Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                                 .addComponent(button7)
@@ -725,7 +1003,7 @@ public class SwingMain extends JFrame {
                             .addContainerGap()
                             .addComponent(button4)
                             .addGap(18, 18, 18)
-                            .addComponent(scrollPane1, GroupLayout.DEFAULT_SIZE, 443, Short.MAX_VALUE)
+                            .addComponent(scrollPane1, GroupLayout.DEFAULT_SIZE, 518, Short.MAX_VALUE)
                             .addContainerGap())
                 );
             }
@@ -752,7 +1030,7 @@ public class SwingMain extends JFrame {
                         .addGroup(panel5Layout.createSequentialGroup()
                             .addContainerGap()
                             .addComponent(button5)
-                            .addContainerGap(467, Short.MAX_VALUE))
+                            .addContainerGap(542, Short.MAX_VALUE))
                 );
             }
             tabbedPane1.addTab("\u56fe\u7247\u884c\u4e3a", panel5);
@@ -827,7 +1105,7 @@ public class SwingMain extends JFrame {
                                 .addComponent(txtSubName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                             .addGroup(panel6Layout.createParallelGroup()
-                                .addComponent(scrollPane4, GroupLayout.DEFAULT_SIZE, 452, Short.MAX_VALUE)
+                                .addComponent(scrollPane4, GroupLayout.DEFAULT_SIZE, 527, Short.MAX_VALUE)
                                 .addGroup(panel6Layout.createSequentialGroup()
                                     .addComponent(scrollPane5, GroupLayout.PREFERRED_SIZE, 85, GroupLayout.PREFERRED_SIZE)
                                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
@@ -840,11 +1118,45 @@ public class SwingMain extends JFrame {
                                     .addGroup(panel6Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(addSubject)
                                         .addComponent(modSub))
-                                    .addGap(0, 290, Short.MAX_VALUE)))
+                                    .addGap(0, 365, Short.MAX_VALUE)))
                             .addContainerGap())
                 );
             }
             tabbedPane1.addTab("\u4e13\u9898\u7f16\u8f91", panel6);
+
+            //======== panel7 ========
+            {
+
+                //---- out ----
+                out.setText("\u5bfc\u51fa\u6570\u636e");
+                out.addActionListener(e -> {
+                    try {
+                        button12ActionPerformed(e);
+                    } catch (WriteException e1) {
+                        e1.printStackTrace();
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                });
+
+                GroupLayout panel7Layout = new GroupLayout(panel7);
+                panel7.setLayout(panel7Layout);
+                panel7Layout.setHorizontalGroup(
+                    panel7Layout.createParallelGroup()
+                        .addGroup(panel7Layout.createSequentialGroup()
+                            .addGap(122, 122, 122)
+                            .addComponent(out)
+                            .addContainerGap(829, Short.MAX_VALUE))
+                );
+                panel7Layout.setVerticalGroup(
+                    panel7Layout.createParallelGroup()
+                        .addGroup(panel7Layout.createSequentialGroup()
+                            .addGap(58, 58, 58)
+                            .addComponent(out)
+                            .addContainerGap(490, Short.MAX_VALUE))
+                );
+            }
+            tabbedPane1.addTab("\u4f7f\u7528\u7edf\u8ba1", panel7);
         }
 
         GroupLayout contentPaneLayout = new GroupLayout(contentPane);
@@ -869,6 +1181,9 @@ public class SwingMain extends JFrame {
     private JButton button2;
     private JButton button3;
     private JLabel label1;
+    private JButton button9;
+    private JButton button10;
+    private JButton button11;
     private JPanel panel2;
     private JPanel panel3;
     private JButton button1;
@@ -903,6 +1218,8 @@ public class SwingMain extends JFrame {
     private JButton modSub;
     private JScrollPane scrollPane5;
     private JTextPane txtSubInfo;
+    private JPanel panel7;
+    private JButton out;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 
     public static void main(String[] args) {
