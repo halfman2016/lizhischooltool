@@ -20,6 +20,7 @@
       <element id="library" level="project" name="org.mongodb:mongodb-driver:3.4.0" />
       <element id="library" level="project" name="net.sourceforge.jexcelapi:jxl:2.6.12" />
       <element id="library" level="project" name="com.qiniu:qiniu-java-sdk:7.2.2" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/mysql-connector-java-5.0.8-bin.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>

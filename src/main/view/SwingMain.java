@@ -625,18 +625,18 @@ public class SwingMain extends JFrame {
             mySqlTools.getConn();
             List<Log> logs=mySqlTools.queryLogTea();
             List<LogAction> logActions=mySqlTools.queryLogAction();
-//            FileNameExtensionFilter filter=new FileNameExtensionFilter("*.xls","xls");
-//            JFileChooser chooser=new JFileChooser();
+            FileNameExtensionFilter filter=new FileNameExtensionFilter("*.xls","xls");
+            JFileChooser chooser=new JFileChooser();
             SimpleDateFormat df=new SimpleDateFormat("YYMMdd");
             String date=df.format(new Date());
-//            chooser.setSelectedFile(new File("情况输出"+date+".xls"));
-//            chooser.setFileFilter(filter);
-//            chooser.setMultiSelectionEnabled(false);
+            chooser.setSelectedFile(new File("情况输出"+date+".xls"));
+            chooser.setFileFilter(filter);
+            chooser.setMultiSelectionEnabled(false);
 
-          //  int result=chooser.showSaveDialog(this);
-           // if(result==JFileChooser.APPROVE_OPTION) {
-              //  File file = chooser.getSelectedFile();
-            File file=new File("情况输出"+date+".xls");
+            int result=chooser.showSaveDialog(this);
+            if(result==JFileChooser.APPROVE_OPTION) {
+                File file = chooser.getSelectedFile();
+        //    File file=new File("情况输出"+date+".xls");
                 if (!file.getPath().endsWith(".xls")) {
                     file = new File(file.getPath() + ".xls");
                 }
@@ -720,7 +720,7 @@ public class SwingMain extends JFrame {
                 workbook.write();
                 workbook.close();
 
-            }
+            }}
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
