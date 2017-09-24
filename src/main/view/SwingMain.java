@@ -14,6 +14,7 @@ import com.qiniu.storage.Configuration;
 import com.qiniu.storage.model.FileInfo;
 import com.qiniu.storage.model.FileListing;
 import com.qiniu.util.Auth;
+import javafx.application.Application;
 import jxl.Cell;
 import jxl.Sheet;
 import jxl.Workbook;
@@ -56,7 +57,6 @@ public class SwingMain extends JFrame {
     ArrayList<Subject> subjects;
     ArrayList<Teacher> teachers;
     String timelabel;
-
     String filePath="";
     public SwingMain() {
         initComponents();
@@ -619,7 +619,7 @@ public class SwingMain extends JFrame {
             mdb.addTea(zhaotea);
         }
 
-        private void button12ActionPerformed(ActionEvent e) throws WriteException, IOException {
+        private void button12ActionPerformed(ActionEvent e) {
             // 输出统计xls
             MySqlTools mySqlTools=new MySqlTools();
             mySqlTools.getConn();
@@ -655,30 +655,61 @@ public class SwingMain extends JFrame {
                     e1.printStackTrace();
                 }
                 label = new Label(1, 0, "登录时间");
-                sheet.addCell(label);
+                try {
+                    sheet.addCell(label);
+                } catch (WriteException e1) {
+                    e1.printStackTrace();
+                }
                 label = new Label(2, 0, "结束时间");
-                sheet.addCell(label);
+                try {
+                    sheet.addCell(label);
+                } catch (WriteException e1) {
+                    e1.printStackTrace();
+                }
                 label = new Label(3, 0, "时长（秒）");
-                sheet.addCell(label);
+                try {
+                    sheet.addCell(label);
+                } catch (WriteException e1) {
+                    e1.printStackTrace();
+                }
                 label = new Label(4, 0, "姓名");
-                sheet.addCell(label);
+                try {
+                    sheet.addCell(label);
+                } catch (WriteException e1) {
+                    e1.printStackTrace();
+                }
                 label = new Label(5, 0, "班级");
-                sheet.addCell(label);
+                try {
+                    sheet.addCell(label);
+                } catch (WriteException e1) {
+                    e1.printStackTrace();
+                }
                 int i = 1;
                 for (Log log : logs) {
                     label = new Label(0, i, log.getLid());
-                    sheet.addCell(label);
+                    try {
+                        sheet.addCell(label);
+
                     label = new Label(1, i, log.getStime().toString());
-                    sheet.addCell(label);
+
+                        sheet.addCell(label);
+
                     label = new Label(2, i, log.getEtime().toString());
-                    sheet.addCell(label);
-                    label = new Label(3, i,(String.valueOf(log.getDtime()/1000)) );
-                    sheet.addCell(label);
+
+                        sheet.addCell(label);
+
+                    label = new Label(3, i, (String.valueOf(log.getDtime() / 1000)));
+
+                        sheet.addCell(label);
+
                     label = new Label(4, i, log.getLname());
                     sheet.addCell(label);
                     label = new Label(5, i, log.getgradeClassName());
                     sheet.addCell(label);
-
+                }
+catch (WriteException e1) {
+                        e1.printStackTrace();
+                    }
                     i = i + 1;
 
                 }
@@ -691,18 +722,24 @@ public class SwingMain extends JFrame {
                     e1.printStackTrace();
                 }
                 label1 = new Label(1, 0, "姓名");
-                sheet1.addCell(label1);
+                try {
+                    sheet1.addCell(label1);
+
                 label1 = new Label(2, 0, "行为内容");
                 sheet1.addCell(label1);
                 label1 = new Label(3, 0, "行为时间");
                 sheet1.addCell(label1);
                 label1 = new Label(4, 0, "班级");
                 sheet1.addCell(label1);
-
+                } catch (WriteException e1) {
+                    e1.printStackTrace();
+                }
                 int ii = 1;
                 for (LogAction log :logActions ) {
                     label1 = new Label(0, ii, log.getActionpeopleid());
-                    sheet1.addCell(label1);
+                    try {
+                        sheet1.addCell(label1);
+
                     label1 = new Label(1, ii, log.getActionpeoplename());
                     sheet1.addCell(label1);
                     label1 = new Label(2, ii, log.getActionname());
@@ -712,15 +749,30 @@ public class SwingMain extends JFrame {
                     label1 = new Label(4, ii, log.getActiongradeclassname());
                     sheet1.addCell(label1);
 
-
+                    } catch (WriteException e1) {
+                        e1.printStackTrace();
+                    }
                     ii = ii + 1;
 
                 }
 
-                workbook.write();
-                workbook.close();
+                try {
+                    workbook.write();
+                    workbook.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                } catch (WriteException e1) {
+                    e1.printStackTrace();
+                }
+
 
             }}
+
+            private void tstActionPerformed(ActionEvent e) {
+                // TODO add your code here
+                List<GradeClass> gradeClassList=mdb.getGradeClassesIsActive();
+                System.out.print("ok");
+            }
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
@@ -768,6 +820,7 @@ public class SwingMain extends JFrame {
         txtSubInfo = new JTextPane();
         panel7 = new JPanel();
         out = new JButton();
+        tst = new JButton();
 
         //======== this ========
         addWindowListener(new WindowAdapter() {
@@ -1129,31 +1182,31 @@ public class SwingMain extends JFrame {
 
                 //---- out ----
                 out.setText("\u5bfc\u51fa\u6570\u636e");
-                out.addActionListener(e -> {
-                    try {
-                        button12ActionPerformed(e);
-                    } catch (WriteException e1) {
-                        e1.printStackTrace();
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
-                });
+                out.addActionListener(e -> button12ActionPerformed(e));
+
+                //---- tst ----
+                tst.setText("text");
+                tst.addActionListener(e -> tstActionPerformed(e));
 
                 GroupLayout panel7Layout = new GroupLayout(panel7);
                 panel7.setLayout(panel7Layout);
                 panel7Layout.setHorizontalGroup(
                     panel7Layout.createParallelGroup()
                         .addGroup(panel7Layout.createSequentialGroup()
-                            .addGap(122, 122, 122)
+                            .addGap(51, 51, 51)
                             .addComponent(out)
-                            .addContainerGap(829, Short.MAX_VALUE))
+                            .addGap(61, 61, 61)
+                            .addComponent(tst)
+                            .addContainerGap(761, Short.MAX_VALUE))
                 );
                 panel7Layout.setVerticalGroup(
                     panel7Layout.createParallelGroup()
                         .addGroup(panel7Layout.createSequentialGroup()
-                            .addGap(58, 58, 58)
-                            .addComponent(out)
-                            .addContainerGap(490, Short.MAX_VALUE))
+                            .addGap(39, 39, 39)
+                            .addGroup(panel7Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                .addComponent(out)
+                                .addComponent(tst))
+                            .addContainerGap(509, Short.MAX_VALUE))
                 );
             }
             tabbedPane1.addTab("\u4f7f\u7528\u7edf\u8ba1", panel7);
@@ -1220,6 +1273,7 @@ public class SwingMain extends JFrame {
     private JTextPane txtSubInfo;
     private JPanel panel7;
     private JButton out;
+    private JButton tst;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 
     public static void main(String[] args) {

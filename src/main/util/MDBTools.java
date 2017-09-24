@@ -31,17 +31,28 @@ import java.util.*;
 public class MDBTools {
     //private static final MongoClient mongoClient = new MongoClient("114.215.124.13", 27017);
     //private static final MongoClient mongoClient = new MongoClient("127.0.0.1", 27017);
-    private static   MongoCredential credential = MongoCredential.createScramSha1Credential("halfman","lizhi","halfman21".toCharArray());
-    private static    MongoClient mongoClient = new MongoClient(new ServerAddress("boteteam.com", 27017),Arrays.asList(credential));
+    private static   MongoCredential credential ;
+    private static    MongoClient mongoClient;
     private MongoDatabase mongoDatabase;
     private MongoCollection<Document> mongoCollection = null;
+
+    private String mode="test"; // test release 2种模式切换
 
 
     public MDBTools() {
 
 //        credential = MongoCredential.createScramSha1Credential("halfman","lizhi","halfman21".toCharArray());
 //        mongoClient = new MongoClient(new ServerAddress("boteteam.com", 27017),Arrays.asList(credential));
-        mongoDatabase = mongoClient.getDatabase("lizhi");
+        if (mode=="test") {
+            credential = MongoCredential.createScramSha1Credential("halfman", "lizhitest", "halfman21".toCharArray());
+            mongoClient = new MongoClient(new ServerAddress("boteteam.com", 27017), Arrays.asList(credential));
+            mongoDatabase = mongoClient.getDatabase("lizhitest");
+        }
+        else if (mode=="release"){
+            credential = MongoCredential.createScramSha1Credential("halfman", "lizhi", "halfman21".toCharArray());
+            mongoClient = new MongoClient(new ServerAddress("boteteam.com", 27017), Arrays.asList(credential));
+            mongoDatabase = mongoClient.getDatabase("lizhi");
+        }
     }
 
     public boolean teacherLogin(String Tid,String pwd){
@@ -200,6 +211,29 @@ public class MDBTools {
 
         mongoCollection=mongoDatabase.getCollection("classes");
         FindIterable<Document> iterable=mongoCollection.find();
+        MongoCursor mongoCursor=iterable.iterator();
+        Gson gson=new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+
+        while (mongoCursor.hasNext())
+        {
+            Document doc=(Document) mongoCursor.next();
+            String json=doc.toJson();
+            gradeClass=gson.fromJson(json,GradeClass.class);
+            gradeClasses.add(gradeClass);
+
+        }
+
+
+        return gradeClasses;
+    }
+
+    public ArrayList<GradeClass> getGradeClassesIsActive() {
+        ArrayList<GradeClass> gradeClasses = new ArrayList<>();
+        GradeClass gradeClass ;
+
+        mongoCollection=mongoDatabase.getCollection("classes");
+
+        FindIterable<Document> iterable=mongoCollection.find(Filters.eq("isActive",true));
         MongoCursor mongoCursor=iterable.iterator();
         Gson gson=new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
 

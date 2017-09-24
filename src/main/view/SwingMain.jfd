@@ -200,14 +200,19 @@ new FormModel {
 					"title": "专题编辑"
 				} )
 				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class org.jdesktop.layout.GroupLayout ) {
-					"$horizontalGroup": "par l {seq l {space :p:122:p, comp out:::p::p, space ::829:x}}"
-					"$verticalGroup": "par l {seq l {space :p:58:p, comp out:::p::p, space ::490:x}}"
+					"$horizontalGroup": "par l {seq l {space :p:51:p, comp out:::p::p, space :p:61:p, comp tst:::p::p, space ::761:x}}"
+					"$verticalGroup": "par l {seq l {space :p:39:p, par b {comp out::b:p::p, comp tst::b:p::p}, space ::509:x}}"
 				} ) {
 					name: "panel7"
 					add( new FormComponent( "javax.swing.JButton" ) {
 						name: "out"
 						"text": "导出数据"
 						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "button12ActionPerformed", true ) )
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "tst"
+						"text": "text"
+						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "tstActionPerformed", true ) )
 					} )
 				}, new FormLayoutConstraints( null ) {
 					"title": "使用统计"

@@ -106,7 +106,7 @@ public class MySqlTools {
 
         try {
             Statement statement=conn.createStatement();
-            String sql="select * from loginlog where usertype='教师' GROUP BY gradeclassname ORDER BY  stime DESC ";
+            String sql="select * from loginlog where usertype='教师'  ORDER BY  gradeclassname,lid,stime  ";
             ResultSet res=statement.executeQuery(sql);
             while (res.next())
             {
@@ -132,7 +132,7 @@ public class MySqlTools {
         ArrayList<LogAction> logActions=new ArrayList<>();
         try {
             Statement statement=conn.createStatement();
-            String sql="select * from actionlog group by actioname ORDER by actiontime desc";
+            String sql="select * from actionlog ORDER by actiongradeclassname,actioname,actiontime";
             ResultSet res=statement.executeQuery(sql);
             while (res.next())
             {
