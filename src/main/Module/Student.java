@@ -14,12 +14,22 @@ public class Student extends People {
     ArrayList<UUID> daycommonActionids = new ArrayList<>(); //记录日检查的内容
     ArrayList<UUID> picPinActions=new ArrayList<>();  //记录标定的内容
     private String QQ;
+    private String status; //状态，在读 毕业 结业 等 默认 在读
 
     public Student(String name) {
         super(name);
+        status="在读";  // 默认在读
+
+
     }
 
+    public String getStatus() {
+        return status;
+    }
 
+    public void setStatus(String status) {
+        this.status = status;
+    }
     public String getRankname() {
         return rankname;
     }

@@ -12,6 +12,15 @@ public class Teacher extends People {
     private String OnDutyGradeClassName;// == all 特权，3个特权，郑主任和罗校长，林校长。
     private UUID OnDutyGradeClassId;
     private String dutytitle;
+    private String status; // 在职，不在职 // null 自动赋值
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     public String getDutytitle() {
         return dutytitle;
@@ -39,6 +48,7 @@ public class Teacher extends People {
 
     public Teacher(String name) {
         super(name);
+        status="在职";
     }
 
     public String getTid() {

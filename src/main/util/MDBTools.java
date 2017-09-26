@@ -14,6 +14,7 @@ import com.qiniu.common.Zone;
 import com.qiniu.storage.Configuration;
 import com.qiniu.storage.UploadManager;
 import main.Module.*;
+import org.bson.BSON;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -25,112 +26,110 @@ import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static main.util.BsonUtil.getBasicDBObject;
+
 /**
  * Created by Feng on 2016/7/17.
  */
 public class MDBTools {
     //private static final MongoClient mongoClient = new MongoClient("114.215.124.13", 27017);
     //private static final MongoClient mongoClient = new MongoClient("127.0.0.1", 27017);
-    private static   MongoCredential credential ;
-    private static    MongoClient mongoClient;
+    private static MongoCredential credential;
+    private static MongoClient mongoClient;
     private MongoDatabase mongoDatabase;
     private MongoCollection<Document> mongoCollection = null;
 
-    private String mode="test"; // test release 2种模式切换
+    private String mode = "test"; // test release 2种模式切换
 
 
     public MDBTools() {
 
 //        credential = MongoCredential.createScramSha1Credential("halfman","lizhi","halfman21".toCharArray());
 //        mongoClient = new MongoClient(new ServerAddress("boteteam.com", 27017),Arrays.asList(credential));
-        if (mode=="test") {
+        if (mode == "test") {
             credential = MongoCredential.createScramSha1Credential("halfman", "lizhitest", "halfman21".toCharArray());
             mongoClient = new MongoClient(new ServerAddress("boteteam.com", 27017), Arrays.asList(credential));
             mongoDatabase = mongoClient.getDatabase("lizhitest");
-        }
-        else if (mode=="release"){
+        } else if (mode == "release") {
             credential = MongoCredential.createScramSha1Credential("halfman", "lizhi", "halfman21".toCharArray());
             mongoClient = new MongoClient(new ServerAddress("boteteam.com", 27017), Arrays.asList(credential));
             mongoDatabase = mongoClient.getDatabase("lizhi");
         }
     }
 
-    public boolean teacherLogin(String Tid,String pwd){
+    public boolean teacherLogin(String Tid, String pwd) {
 
-        mongoCollection=mongoDatabase.getCollection("teachers");
+        mongoCollection = mongoDatabase.getCollection("teachers");
 
         List<BasicDBObject> objects = new ArrayList<BasicDBObject>();
         objects.add(new BasicDBObject("Tid", Tid));
-        objects.add(new BasicDBObject("pwd",pwd));
+        objects.add(new BasicDBObject("pwd", pwd));
 
-        BasicDBObject query=new BasicDBObject();
+        BasicDBObject query = new BasicDBObject();
 
-        query.put("$and",objects);
+        query.put("$and", objects);
 
         MongoCursor cursor = mongoCollection.find(query).iterator();
 
 
         while (cursor.hasNext()) {
 
-        return true;
+            return true;
 
         }
 
         return false;
     }
 
-    public Teacher getTeacher(String Tid){
+    public Teacher getTeacher(String Tid) {
 
-        Teacher teacher=null;
-        mongoCollection =mongoDatabase.getCollection("teachers");
-        BasicDBObject basicDBObject=new BasicDBObject("Tid",Tid);
-        MongoCursor cursor=mongoCollection.find(basicDBObject).iterator();
+        Teacher teacher = null;
+        mongoCollection = mongoDatabase.getCollection("teachers");
+        BasicDBObject basicDBObject = new BasicDBObject("Tid", Tid);
+        MongoCursor cursor = mongoCollection.find(basicDBObject).iterator();
 
-        while (cursor.hasNext())
-        {
+        while (cursor.hasNext()) {
 
 
-            Document doc=(Document) cursor.next();
+            Document doc = (Document) cursor.next();
 
-            Gson gson=new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
-            teacher=gson.fromJson(doc.toJson(),Teacher.class);
+            Gson gson = new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+            teacher = gson.fromJson(doc.toJson(), Teacher.class);
 
         }
 
         return teacher;
     }
 
-    public Subject getSubject(String _id){
-        Subject subject=null;
-        mongoCollection=mongoDatabase.getCollection("subjects");
-        BasicDBObject basicDBObject=new BasicDBObject("_id",_id);
-        MongoCursor cursor=mongoCollection.find(basicDBObject).iterator();
-        while (cursor.hasNext())
-        {
-            Document doc=(Document) cursor.next();
-            Gson gson=new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
-            subject=gson.fromJson(doc.toJson(),Subject.class);
+    public Subject getSubject(String _id) {
+        Subject subject = null;
+        mongoCollection = mongoDatabase.getCollection("subjects");
+        BasicDBObject basicDBObject = new BasicDBObject("_id", _id);
+        MongoCursor cursor = mongoCollection.find(basicDBObject).iterator();
+        while (cursor.hasNext()) {
+            Document doc = (Document) cursor.next();
+            Gson gson = new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+            subject = gson.fromJson(doc.toJson(), Subject.class);
         }
         return subject;
     }
-    public void saveSubject(Subject subject){
-        mongoCollection=mongoDatabase.getCollection("subjects");
-        Gson gson=new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
-        String json=gson.toJson(subject);
+
+    public void saveSubject(Subject subject) {
+        mongoCollection = mongoDatabase.getCollection("subjects");
+        Gson gson = new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+        String json = gson.toJson(subject);
         mongoCollection.insertOne(Document.parse(json));
 
     }
 
 
-
-    public  void updateSubject(Subject subject){
-        mongoCollection=mongoDatabase.getCollection("subjects");
-        Gson gson=new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
-        String json=gson.toJson(subject);
-        mongoCollection.findOneAndReplace(Filters.eq("_id",subject.get_id().toString()), Document.parse(json));
+    public void updateSubject(Subject subject) {
+        mongoCollection = mongoDatabase.getCollection("subjects");
+        Gson gson = new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+        String json = gson.toJson(subject);
+        mongoCollection.findOneAndReplace(Filters.eq("_id", subject.get_id().toString()), Document.parse(json));
 
     }
-
 
 
     public void addStu(Student student) {
@@ -145,59 +144,56 @@ public class MDBTools {
 
     {
         mongoCollection = mongoDatabase.getCollection("teachers");
-        Gson gson=new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
-        String json=gson.toJson(tea);
+        Gson gson = new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+        String json = gson.toJson(tea);
         mongoCollection.insertOne(Document.parse(json));
 
     }
-    public ArrayList<Student> getStus()
-    {
-        ArrayList<Student> stus=new ArrayList<>();
+
+    public ArrayList<Student> getStus() {
+        ArrayList<Student> stus = new ArrayList<>();
         Student stu;
-        mongoCollection=mongoDatabase.getCollection("students");
-        FindIterable<Document> iterator=mongoCollection.find();
-        MongoCursor mongoCursor=iterator.iterator();
-        Gson gson=new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
-        while (mongoCursor.hasNext())
-        {
+        mongoCollection = mongoDatabase.getCollection("students");
+        FindIterable<Document> iterator = mongoCollection.find();
+        MongoCursor mongoCursor = iterator.iterator();
+        Gson gson = new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+        while (mongoCursor.hasNext()) {
             String json;
-            Document doc=(Document) mongoCursor.next();
-            json=doc.toJson();
-            stu=gson.fromJson(json,Student.class);
+            Document doc = (Document) mongoCursor.next();
+            json = doc.toJson();
+            stu = gson.fromJson(json, Student.class);
             stus.add(stu);
         }
         return stus;
     }
 
-    public  ArrayList<Subject> getSubjects(){
-        ArrayList<Subject> subjects=new ArrayList<>();
+    public ArrayList<Subject> getSubjects() {
+        ArrayList<Subject> subjects = new ArrayList<>();
         Subject subject;
-        mongoCollection=mongoDatabase.getCollection("subjects");
-        FindIterable<Document> iterable=mongoCollection.find().sort(new BasicDBObject("endTime",-1));
-        MongoCursor mongoCursor=iterable.iterator();
-        Gson gson=new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
-        while (mongoCursor.hasNext())
-        {
-            Document doc=(Document) mongoCursor.next();
+        mongoCollection = mongoDatabase.getCollection("subjects");
+        FindIterable<Document> iterable = mongoCollection.find().sort(new BasicDBObject("endTime", -1));
+        MongoCursor mongoCursor = iterable.iterator();
+        Gson gson = new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+        while (mongoCursor.hasNext()) {
+            Document doc = (Document) mongoCursor.next();
 
-            subject=gson.fromJson(doc.toJson(),Subject.class);
+            subject = gson.fromJson(doc.toJson(), Subject.class);
             subjects.add(subject);
 
         }
-        return  subjects;
+        return subjects;
     }
 
-    public ArrayList<Teacher> getTeas()
-    {
+    public ArrayList<Teacher> getTeas() {
         ArrayList<Teacher> teas = new ArrayList<>();
         Teacher tea;
         mongoCollection = mongoDatabase.getCollection("teachers");
-        FindIterable<Document> iterable=mongoCollection.find();
-        MongoCursor mongoCursor=iterable.iterator();
-        Gson gson=new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
-        while (mongoCursor.hasNext()){
-            Document doc= (Document) mongoCursor.next();
-            String json=doc.toJson();
+        FindIterable<Document> iterable = mongoCollection.find();
+        MongoCursor mongoCursor = iterable.iterator();
+        Gson gson = new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+        while (mongoCursor.hasNext()) {
+            Document doc = (Document) mongoCursor.next();
+            String json = doc.toJson();
             tea = gson.fromJson(json, Teacher.class);
             teas.add(tea);
         }
@@ -207,18 +203,17 @@ public class MDBTools {
 
     public ArrayList<GradeClass> getGradeClasses() {
         ArrayList<GradeClass> gradeClasses = new ArrayList<>();
-        GradeClass gradeClass ;
+        GradeClass gradeClass;
 
-        mongoCollection=mongoDatabase.getCollection("classes");
-        FindIterable<Document> iterable=mongoCollection.find();
-        MongoCursor mongoCursor=iterable.iterator();
-        Gson gson=new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+        mongoCollection = mongoDatabase.getCollection("classes");
+        FindIterable<Document> iterable = mongoCollection.find();
+        MongoCursor mongoCursor = iterable.iterator();
+        Gson gson = new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
 
-        while (mongoCursor.hasNext())
-        {
-            Document doc=(Document) mongoCursor.next();
-            String json=doc.toJson();
-            gradeClass=gson.fromJson(json,GradeClass.class);
+        while (mongoCursor.hasNext()) {
+            Document doc = (Document) mongoCursor.next();
+            String json = doc.toJson();
+            gradeClass = gson.fromJson(json, GradeClass.class);
             gradeClasses.add(gradeClass);
 
         }
@@ -229,19 +224,18 @@ public class MDBTools {
 
     public ArrayList<GradeClass> getGradeClassesIsActive() {
         ArrayList<GradeClass> gradeClasses = new ArrayList<>();
-        GradeClass gradeClass ;
+        GradeClass gradeClass;
 
-        mongoCollection=mongoDatabase.getCollection("classes");
+        mongoCollection = mongoDatabase.getCollection("classes");
 
-        FindIterable<Document> iterable=mongoCollection.find(Filters.eq("isActive",true));
-        MongoCursor mongoCursor=iterable.iterator();
-        Gson gson=new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+        FindIterable<Document> iterable = mongoCollection.find(Filters.eq("isActive", true));
+        MongoCursor mongoCursor = iterable.iterator();
+        Gson gson = new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
 
-        while (mongoCursor.hasNext())
-        {
-            Document doc=(Document) mongoCursor.next();
-            String json=doc.toJson();
-            gradeClass=gson.fromJson(json,GradeClass.class);
+        while (mongoCursor.hasNext()) {
+            Document doc = (Document) mongoCursor.next();
+            String json = doc.toJson();
+            gradeClass = gson.fromJson(json, GradeClass.class);
             gradeClasses.add(gradeClass);
 
         }
@@ -250,61 +244,116 @@ public class MDBTools {
         return gradeClasses;
     }
 
-    public GradeClass getGradeClass(UUID uuid){
+    public GradeClass getGradeClassIsActiveByName(String classname) {
         GradeClass gradeClass;
-        mongoCollection=mongoDatabase.getCollection("classes");
-        Document document=mongoCollection.find(Filters.eq("_id",uuid.toString())).first();
-       Gson gson=new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+        mongoCollection = mongoDatabase.getCollection("classes");
+        String sql = "{isActive:true,Name:'" + classname + "'}";
+        BasicDBObject dbObject = getBasicDBObject(sql);
+        Document document = mongoCollection.find(dbObject).first();
+        Gson gson = new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+        gradeClass = gson.fromJson(document.toJson(), GradeClass.class);
+        return gradeClass;
 
-        gradeClass=gson.fromJson(document.toJson(),GradeClass.class);
+
+    }
+
+    public GradeClass getGradeClass(UUID uuid) {
+        GradeClass gradeClass;
+        mongoCollection = mongoDatabase.getCollection("classes");
+        Document document = mongoCollection.find(Filters.eq("_id", uuid.toString())).first();
+        Gson gson = new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+
+        gradeClass = gson.fromJson(document.toJson(), GradeClass.class);
 
         return gradeClass;
     }
 
-    public GradeClass getGradeClassByName(String classname){
+    public GradeClass getGradeClassByName(String classname) {
         GradeClass gradeClass;
-        mongoCollection=mongoDatabase.getCollection("classes");
-        Document document=mongoCollection.find(Filters.eq("Name",classname)).first();
-        Gson gson=new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
-        gradeClass=gson.fromJson(document.toJson(),GradeClass.class);
+        mongoCollection = mongoDatabase.getCollection("classes");
+        Document document = mongoCollection.find(Filters.eq("Name", classname)).first();
+        Gson gson = new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+        gradeClass = gson.fromJson(document.toJson(), GradeClass.class);
 
 
         return gradeClass;
     }
 
-    public List<PinAction> getPinActions(){
-        List<PinAction> pinActions=new ArrayList<>();
+    public List<PinAction> getPinActions() {
+        List<PinAction> pinActions = new ArrayList<>();
         PinAction pinAction;
-        mongoCollection=mongoDatabase.getCollection("pinactions");
-        FindIterable<Document> iterable=mongoCollection.find();
-        MongoCursor mongoCursor=iterable.iterator();
-        Gson gson=new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
-        while (mongoCursor.hasNext())
-        {
-            Document doc=(Document)mongoCursor.next();
-            pinAction=gson.fromJson(doc.toJson(),PinAction.class);
+        mongoCollection = mongoDatabase.getCollection("pinactions");
+        FindIterable<Document> iterable = mongoCollection.find();
+        MongoCursor mongoCursor = iterable.iterator();
+        Gson gson = new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+        while (mongoCursor.hasNext()) {
+            Document doc = (Document) mongoCursor.next();
+            pinAction = gson.fromJson(doc.toJson(), PinAction.class);
             pinActions.add(pinAction);
         }
 
         return pinActions;
     }
 
-    public void saveGradeClasses(ArrayList<GradeClass> gradeClasses){
-        mongoCollection=mongoDatabase.getCollection("classes");
-        mongoCollection.deleteMany(Filters.exists("_id"));
-
-        Gson gson=new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+    public void saveGradeClasses(ArrayList<GradeClass> gradeClasses) {
+        //isActive false 永远不删除
+        mongoCollection = mongoDatabase.getCollection("classes");
+        //全部删除
+        //mongoCollection.deleteMany(Filters.exists("_id"));
+        Gson gson = new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
         Document doc = new Document();
-        List<Document> docs=new ArrayList<>();
-        for (GradeClass temp:gradeClasses
-             ) {
-            doc= Document.parse(gson.toJson(temp));
+        List<Document> docs = new ArrayList<>();
+        for (GradeClass temp : gradeClasses
+                ) {
+            doc = Document.parse(gson.toJson(temp));
             docs.add(doc);
 
         }
 
         mongoCollection.insertMany(docs);
 
+    }
+
+    public void setIsActiveFalseGradeClass(){
+        mongoCollection=mongoDatabase.getCollection("classes");
+        Document update = new Document();
+        update.append("$set",new Document("isActive",false));
+        mongoCollection.updateMany(Filters.exists("_id"),update);
+
+    }
+
+    public void saveStudents(ArrayList<Student> students)
+    {
+        //清空，全部重写进去，用于年度升级所用
+        mongoCollection=mongoDatabase.getCollection("students");
+        //全部删除，全部重写
+        mongoCollection.deleteMany(Filters.exists("_id"));
+        Gson gson = new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+        Document doc = new Document();
+        List<Document> docs = new ArrayList<>();
+        for (Student stu:students){
+            doc=Document.parse(gson.toJson(stu));
+            docs.add(doc);
+        }
+
+            mongoCollection.insertMany(docs);
+
+    }
+
+    public void saveTeachers(ArrayList<Teacher> teachers){
+        //清空，全部写入
+        mongoCollection=mongoDatabase.getCollection("teachers");
+        //全部删除，全部重写
+        mongoCollection.deleteMany(Filters.exists("_id"));
+        Gson gson = new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+        Document doc = new Document();
+        List<Document> docs = new ArrayList<>();
+        for (Teacher tea:teachers){
+            doc=Document.parse(gson.toJson(tea));
+            docs.add(doc);
+        }
+
+        mongoCollection.insertMany(docs);
     }
 
 

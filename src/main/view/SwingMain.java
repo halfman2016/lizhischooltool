@@ -34,6 +34,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.GroupLayout;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -54,8 +55,16 @@ public class SwingMain extends JFrame {
     Vector listname=new Vector();
     Vector teaname=new Vector();
     Vector subname=new Vector();
+    Vector gclist=new Vector();
+    Vector stulist=new Vector();
+    Vector gcstulist=new Vector();
     ArrayList<Subject> subjects;
     ArrayList<Teacher> teachers;
+    ArrayList<Student> students;  //学生清单
+    ArrayList<Student> gcstudents; //班级学生清单
+    ArrayList<GradeClass> gradeClasses;  //班级清单
+
+
     String timelabel;
     String filePath="";
     public SwingMain() {
@@ -323,7 +332,6 @@ public class SwingMain extends JFrame {
 
     private void list2ValueChanged(ListSelectionEvent e) {
         // TODO add your code here  图片列表点击
-
 
         Icon icon;
         String url="http://lizhibutian.boteteam.com/" + listname.get(list2.getSelectedIndex());
@@ -771,8 +779,254 @@ catch (WriteException e1) {
             private void tstActionPerformed(ActionEvent e) {
                 // TODO add your code here
                 List<GradeClass> gradeClassList=mdb.getGradeClassesIsActive();
-                System.out.print("ok");
+                GradeClass gradeClass=mdb.getGradeClassIsActiveByName("九1班");
+
+                Student stu=new Student("常文静");
+
+
             }
+
+            private void LoadStuActionPerformed(ActionEvent e) {
+                // 从服务器读取学生名单
+
+              students= (ArrayList<Student>) mdb.getStus();gradeClasses=mdb.getGradeClassesIsActive();
+                stulist.clear();
+                for(Student stu:students){
+                    stulist.add(stu.getName()+"  " + stu.getStatus() + " " + stu.get_id().toString());
+                }
+                stunamelist.setListData(stulist);
+
+
+
+                gclist.clear();
+
+                for(GradeClass gc:gradeClasses){
+                    gclist.add(gc.getName());
+                }
+                classlist.setListData(gclist);
+
+            }
+
+            private void addgradeclassActionPerformed(ActionEvent e) {
+
+
+
+            }
+
+            private void classlistValueChanged(ListSelectionEvent e) {
+                // TODO add your code here
+                GradeClass gc=gradeClasses.get(classlist.getSelectedIndex());
+                gcstudents= (ArrayList<Student>) gc.getStus();
+                gcstulist.clear();
+                for (Student stu:gcstudents){
+                    gcstulist.add(stu.getName());
+                }
+                listgcstu.setListData(gcstulist);
+                  }
+
+                  private void addstudentsActionPerformed(ActionEvent e) {
+                      // TODO add your code here
+
+                      // 从服务器读取当前的数据库内容
+                  //   if(students.size()>0) students.clear();
+                    //  if(gradeClasses.size()>0) gradeClasses.clear();
+
+
+                      students = mdb.getStus();
+                      gradeClasses = mdb.getGradeClassesIsActive();
+
+                      String path = "";
+                      JFileChooser chooser = new JFileChooser("D:\\1newbote\\lizhi");
+                      FileNameExtensionFilter filter = new FileNameExtensionFilter(
+                              "2003~2007 Excel files", "xls");
+                      chooser.setFileFilter(filter);
+                      int ii = chooser.showOpenDialog(null);
+                      if (ii == chooser.APPROVE_OPTION) {
+                          path = chooser.getSelectedFile().getAbsolutePath();
+
+
+                          try {
+                              Workbook workbook = Workbook.getWorkbook(new File(path));
+                              Sheet sheet = workbook.getSheet(0);
+                                int colss=sheet.getColumns();
+                              for (int cols = 1; cols < sheet.getColumns(); cols++) {
+                                  Cell[] cells = sheet.getColumn(cols);
+
+                                  //新建导入的班级
+
+                                  GradeClass gradeClass = new GradeClass(cells[0].getContents());
+                                  ArrayList<Student> classstues=new ArrayList<>();
+
+                                  for (int j = 1; j < cells.length; j++) {
+                                      //    Cell cell1 = sheet.getCell(i, j);
+                                      Student stu=null;
+                                      boolean isnothave = true;
+
+                                      for (int i = 0; i < students.size(); i++) {
+
+                                          if (students.get(i).getName().equals( cells[j].getContents())) {
+                                              // 学生在老名单里面
+                                              stu=students.get(i);
+                                             stu.setStatus("在读");
+                                              //赋予新班级的信息
+                                              stu.setGradeclass(gradeClass.getName());
+                                              stu.setGradeclassid(gradeClass.get_id());
+
+                                              students.set(i,stu);
+                                              isnothave = false;
+                                              break;
+                                          }
+                                      }
+
+                                      if (isnothave) {
+                                          stu = new Student(cells[j].getContents());
+                                          stu.setGradeclass(gradeClass.getName());
+                                          stu.setGradeclassid(gradeClass.get_id());
+                                          stu.setPwd("123456");
+                                          stu.setStatus("在读");
+                                          students.add(stu);
+                                      }
+
+                                      classstues.add(stu);
+                                  }
+                                  gradeClass.setStus(classstues);
+                                  gradeClasses.add(gradeClass);
+                              }
+                          }
+                          catch (IOException e1) {
+                              e1.printStackTrace();
+                          } catch (BiffException e1) {
+                              e1.printStackTrace();
+                          }
+
+                          System.out.print("");
+
+                      }
+
+                      stulist.clear();
+                      for(Student stu:students){
+                          stulist.add(stu.getName()+"  " + stu.getStatus() + " " + stu.get_id().toString());
+                      }
+                      stunamelist.setListData(stulist);
+
+
+
+                      gclist.clear();
+
+                      for(GradeClass gc:gradeClasses){
+                          gclist.add(gc.getName());
+                      }
+                      classlist.setListData(gclist);
+
+
+                  }
+
+                  private void saveClassAndStuActionPerformed(ActionEvent e) {
+                      // TODO add your code here
+                      mdb.saveGradeClasses(gradeClasses);
+                      mdb.saveStudents(students);
+
+                  }
+
+                  private void LoadFromServerTeaActionPerformed(ActionEvent e) {
+                      // TODO add your code here
+                      //teachers=mdb.getTeas();
+                      //gradeClasses=mdb.getGradeClassesIsActive();
+                     // mdb.setIsActiveFalseGradeClass();
+                  }
+
+                  private void ImportFromFileTeaActionPerformed(ActionEvent e) {
+                      // TODO add your code here
+                      teachers = mdb.getTeas(); //读取旧教师名单那
+                      gradeClasses = mdb.getGradeClassesIsActive();
+                      //班级已经OK，所以班级不新建
+
+                      String path = "";
+                      JFileChooser chooser = new JFileChooser("D:\\1newbote\\lizhi");
+                      FileNameExtensionFilter filter = new FileNameExtensionFilter(
+                              "2003~2007 Excel files", "xls");
+                      chooser.setFileFilter(filter);
+                      int ii = chooser.showOpenDialog(null);
+                      if (ii == chooser.APPROVE_OPTION) {
+                          path = chooser.getSelectedFile().getAbsolutePath();
+
+
+                          try {
+                              Workbook workbook = Workbook.getWorkbook(new File(path));
+                              Sheet sheet = workbook.getSheet(0);
+                              int colss=sheet.getColumns();
+                              for (int cols = 1; cols < sheet.getColumns(); cols++) {
+                                  Cell[] cells = sheet.getColumn(cols);
+                              //获得班级对象
+                                  GradeClass gradeClass=mdb.getGradeClassIsActiveByName(cells[0].getContents());
+
+                                  for (int j = 1; j < cells.length; j++) {
+
+                                      Teacher tea=null;
+                                      boolean isnothave = true;
+
+                                      for (int i = 0; i < teachers.size(); i++) {
+
+                                          if (teachers.get(i).getName().equals( cells[j].getContents())) {
+                                              // 教师在老名单里面
+                                              tea=teachers.get(i);
+                                              tea.setStatus("在职");
+                                              //赋予新班级的信息
+                                              tea.setOnDutyGradeClassName(gradeClass.getName());
+                                              tea.setOnDutyGradeClassId(gradeClass.get_id());
+
+                                              teachers.set(i,tea);
+                                              isnothave = false;
+                                              break;
+                                          }
+                                      }
+
+                                      if (isnothave) {
+                                          tea = new Teacher(cells[j].getContents());
+                                          tea.setOnDutyGradeClassName(gradeClass.getName());
+                                          tea.setOnDutyGradeClassId(gradeClass.get_id());
+                                          tea.setPwd("123456");
+                                          tea.setStatus("在职");
+                                          teachers.add(tea);
+                                      }
+
+
+                                  }
+
+
+                              }
+                          }
+                          catch (IOException e1) {
+                              e1.printStackTrace();
+                          } catch (BiffException e1) {
+                              e1.printStackTrace();
+                          }
+
+                          System.out.print("");
+
+                      }
+
+                      if (teaname.size()>0) teaname.clear();
+                      for(Teacher tea:teachers){
+                          teaname.add(tea.getName()+"  " + tea.getStatus() + " " + tea.get_id().toString());
+                      }
+                      listteanameForClass.setListData(teaname);
+
+
+
+                      gclist.clear();
+
+                      for(GradeClass gc:gradeClasses){
+                          gclist.add(gc.getName());
+                      }
+                      classlist.setListData(gclist);
+                  }
+
+                  private void btnSaveTeaclasstoServerActionPerformed(ActionEvent e) {
+                      // TODO add your code here
+                      mdb.saveTeachers(teachers);
+
+                  }
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
@@ -784,7 +1038,25 @@ catch (WriteException e1) {
         button9 = new JButton();
         button10 = new JButton();
         button11 = new JButton();
+        LoadStu = new JButton();
+        scrollPane9 = new JScrollPane();
+        stunamelist = new JList();
+        scrollPane10 = new JScrollPane();
+        classlist = new JList();
+        scrollPane11 = new JScrollPane();
+        listgcstu = new JList();
+        addstudents = new JButton();
+        textField1 = new JTextField();
+        textField2 = new JTextField();
+        labelsid = new JLabel();
+        saveClassAndStu = new JButton();
+        checkupyear = new JCheckBox();
         panel2 = new JPanel();
+        scrollPane12 = new JScrollPane();
+        listteanameForClass = new JList();
+        LoadFromServerTea = new JButton();
+        ImportFromFileTea = new JButton();
+        btnSaveTeaclasstoServer = new JButton();
         panel3 = new JPanel();
         button1 = new JButton();
         scrollPane2 = new JScrollPane();
@@ -863,41 +1135,132 @@ catch (WriteException e1) {
                 button11.setEnabled(false);
                 button11.addActionListener(e -> button11ActionPerformed(e));
 
+                //---- LoadStu ----
+                LoadStu.setText("\u4ece\u670d\u52a1\u5668\u8bfb\u53d6");
+                LoadStu.addActionListener(e -> LoadStuActionPerformed(e));
+
+                //======== scrollPane9 ========
+                {
+                    scrollPane9.setViewportView(stunamelist);
+                }
+
+                //======== scrollPane10 ========
+                {
+
+                    //---- classlist ----
+                    classlist.addListSelectionListener(e -> classlistValueChanged(e));
+                    scrollPane10.setViewportView(classlist);
+                }
+
+                //======== scrollPane11 ========
+                {
+                    scrollPane11.setViewportView(listgcstu);
+                }
+
+                //---- addstudents ----
+                addstudents.setText("\u5bfc\u5165\u5b66\u751f");
+                addstudents.addActionListener(e -> addstudentsActionPerformed(e));
+
+                //---- labelsid ----
+                labelsid.setText("text");
+
+                //---- saveClassAndStu ----
+                saveClassAndStu.setText("\u4fdd\u5b58\u5b66\u751f\u548c\u73ed\u7ea7\u8bbe\u7f6e");
+                saveClassAndStu.addActionListener(e -> saveClassAndStuActionPerformed(e));
+
+                //---- checkupyear ----
+                checkupyear.setText("\u5b66\u5e74\u5207\u6362\uff08\u539f\u73ed\u7ea7\u4f5c\u5e9f\uff09");
+
                 GroupLayout panel1Layout = new GroupLayout(panel1);
                 panel1.setLayout(panel1Layout);
                 panel1Layout.setHorizontalGroup(
                     panel1Layout.createParallelGroup()
                         .addGroup(panel1Layout.createSequentialGroup()
+                            .addContainerGap()
                             .addGroup(panel1Layout.createParallelGroup()
                                 .addGroup(panel1Layout.createSequentialGroup()
-                                    .addContainerGap()
-                                    .addComponent(button2)
-                                    .addGap(5, 5, 5)
-                                    .addComponent(label1)
-                                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(button3))
+                                    .addGroup(panel1Layout.createParallelGroup()
+                                        .addComponent(LoadStu)
+                                        .addGroup(panel1Layout.createSequentialGroup()
+                                            .addComponent(button2)
+                                            .addGap(5, 5, 5)
+                                            .addComponent(label1)
+                                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                            .addComponent(button3)
+                                            .addGap(18, 18, 18)
+                                            .addComponent(button9)
+                                            .addGap(18, 18, 18)
+                                            .addComponent(button10)
+                                            .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                            .addComponent(button11)))
+                                    .addContainerGap(318, Short.MAX_VALUE))
                                 .addGroup(panel1Layout.createSequentialGroup()
-                                    .addGap(29, 29, 29)
-                                    .addComponent(button9)
-                                    .addGap(38, 38, 38)
-                                    .addComponent(button10)
-                                    .addGap(80, 80, 80)
-                                    .addComponent(button11)))
-                            .addContainerGap(532, Short.MAX_VALUE))
+                                    .addGroup(panel1Layout.createParallelGroup()
+                                        .addGroup(GroupLayout.Alignment.TRAILING, panel1Layout.createSequentialGroup()
+                                            .addComponent(saveClassAndStu, GroupLayout.PREFERRED_SIZE, 186, GroupLayout.PREFERRED_SIZE)
+                                            .addGap(73, 73, 73))
+                                        .addGroup(panel1Layout.createSequentialGroup()
+                                            .addGroup(panel1Layout.createParallelGroup()
+                                                .addGroup(panel1Layout.createSequentialGroup()
+                                                    .addComponent(addstudents)
+                                                    .addGap(18, 18, 18)
+                                                    .addComponent(checkupyear))
+                                                .addComponent(scrollPane10, GroupLayout.PREFERRED_SIZE, 202, GroupLayout.PREFERRED_SIZE))
+                                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)))
+                                    .addComponent(scrollPane11, GroupLayout.PREFERRED_SIZE, 180, GroupLayout.PREFERRED_SIZE)
+                                    .addGap(18, 18, 18)
+                                    .addGroup(panel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(labelsid, GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE)
+                                        .addComponent(textField1, GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE))
+                                    .addGap(41, 41, 41)
+                                    .addComponent(textField2, GroupLayout.PREFERRED_SIZE, 66, GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 81, Short.MAX_VALUE)
+                                    .addComponent(scrollPane9, GroupLayout.PREFERRED_SIZE, 215, GroupLayout.PREFERRED_SIZE)
+                                    .addGap(15, 15, 15))))
                 );
                 panel1Layout.setVerticalGroup(
                     panel1Layout.createParallelGroup()
                         .addGroup(panel1Layout.createSequentialGroup()
-                            .addGroup(panel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(button3)
-                                .addComponent(button2)
-                                .addComponent(label1))
-                            .addGap(86, 86, 86)
-                            .addGroup(panel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(button9)
-                                .addComponent(button10)
-                                .addComponent(button11))
-                            .addGap(0, 429, Short.MAX_VALUE))
+                            .addGroup(panel1Layout.createParallelGroup()
+                                .addGroup(panel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                    .addComponent(button3)
+                                    .addComponent(button2)
+                                    .addComponent(label1))
+                                .addGroup(panel1Layout.createSequentialGroup()
+                                    .addContainerGap()
+                                    .addGroup(panel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(button9)
+                                        .addComponent(button10)
+                                        .addComponent(button11))))
+                            .addGroup(panel1Layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                                .addGroup(panel1Layout.createSequentialGroup()
+                                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addComponent(LoadStu)
+                                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                    .addGroup(panel1Layout.createParallelGroup()
+                                        .addGroup(panel1Layout.createSequentialGroup()
+                                            .addComponent(scrollPane9, GroupLayout.DEFAULT_SIZE, 505, Short.MAX_VALUE)
+                                            .addContainerGap())
+                                        .addGroup(panel1Layout.createSequentialGroup()
+                                            .addGroup(panel1Layout.createParallelGroup()
+                                                .addComponent(scrollPane11, GroupLayout.PREFERRED_SIZE, 297, GroupLayout.PREFERRED_SIZE)
+                                                .addGroup(panel1Layout.createSequentialGroup()
+                                                    .addComponent(scrollPane10, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                    .addGap(18, 18, 18)
+                                                    .addGroup(panel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(addstudents)
+                                                        .addComponent(checkupyear))))
+                                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 143, Short.MAX_VALUE)
+                                            .addComponent(saveClassAndStu, GroupLayout.PREFERRED_SIZE, 39, GroupLayout.PREFERRED_SIZE)
+                                            .addGap(32, 32, 32))))
+                                .addGroup(GroupLayout.Alignment.LEADING, panel1Layout.createSequentialGroup()
+                                    .addGap(78, 78, 78)
+                                    .addGroup(panel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(textField1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(textField2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                    .addGap(18, 18, 18)
+                                    .addComponent(labelsid)
+                                    .addContainerGap())))
                 );
             }
             tabbedPane1.addTab("\u4eba\u5458\u73ed\u7ea7", panel1);
@@ -905,15 +1268,50 @@ catch (WriteException e1) {
             //======== panel2 ========
             {
 
+                //======== scrollPane12 ========
+                {
+                    scrollPane12.setViewportView(listteanameForClass);
+                }
+
+                //---- LoadFromServerTea ----
+                LoadFromServerTea.setText("\u4ece\u670d\u52a1\u5668\u8bfb\u53d6");
+                LoadFromServerTea.addActionListener(e -> LoadFromServerTeaActionPerformed(e));
+
+                //---- ImportFromFileTea ----
+                ImportFromFileTea.setText("\u4ece\u6587\u4ef6\u5bfc\u5165");
+                ImportFromFileTea.addActionListener(e -> ImportFromFileTeaActionPerformed(e));
+
+                //---- btnSaveTeaclasstoServer ----
+                btnSaveTeaclasstoServer.setText("\u4fdd\u5b58\u5230\u670d\u52a1\u5668\uff08\u5148\u64cd\u4f5c\u6570\u636e\u4e4b\u540e\uff09");
+                btnSaveTeaclasstoServer.addActionListener(e -> btnSaveTeaclasstoServerActionPerformed(e));
+
                 GroupLayout panel2Layout = new GroupLayout(panel2);
                 panel2.setLayout(panel2Layout);
                 panel2Layout.setHorizontalGroup(
                     panel2Layout.createParallelGroup()
-                        .addGap(0, 1002, Short.MAX_VALUE)
+                        .addGroup(panel2Layout.createSequentialGroup()
+                            .addGap(27, 27, 27)
+                            .addGroup(panel2Layout.createParallelGroup()
+                                .addComponent(btnSaveTeaclasstoServer)
+                                .addComponent(scrollPane12, GroupLayout.PREFERRED_SIZE, 261, GroupLayout.PREFERRED_SIZE)
+                                .addGroup(panel2Layout.createSequentialGroup()
+                                    .addComponent(LoadFromServerTea, GroupLayout.PREFERRED_SIZE, 137, GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addComponent(ImportFromFileTea, GroupLayout.PREFERRED_SIZE, 112, GroupLayout.PREFERRED_SIZE)))
+                            .addContainerGap(702, Short.MAX_VALUE))
                 );
                 panel2Layout.setVerticalGroup(
                     panel2Layout.createParallelGroup()
-                        .addGap(0, 581, Short.MAX_VALUE)
+                        .addGroup(panel2Layout.createSequentialGroup()
+                            .addGap(9, 9, 9)
+                            .addGroup(panel2Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                .addComponent(LoadFromServerTea)
+                                .addComponent(ImportFromFileTea))
+                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(scrollPane12, GroupLayout.PREFERRED_SIZE, 485, GroupLayout.PREFERRED_SIZE)
+                            .addGap(18, 18, 18)
+                            .addComponent(btnSaveTeaclasstoServer)
+                            .addContainerGap(17, Short.MAX_VALUE))
                 );
             }
             tabbedPane1.addTab("\u6559\u5e08\u914d\u7f6e", panel2);
@@ -983,13 +1381,13 @@ catch (WriteException e1) {
                                     .addGap(22, 22, 22)
                                     .addComponent(txtPicDateTime, GroupLayout.PREFERRED_SIZE, 254, GroupLayout.PREFERRED_SIZE)
                                     .addGap(132, 132, 132)
-                                    .addComponent(button7, GroupLayout.DEFAULT_SIZE, 169, Short.MAX_VALUE))
-                                .addComponent(scrollPane3, GroupLayout.DEFAULT_SIZE, 577, Short.MAX_VALUE))
+                                    .addComponent(button7, GroupLayout.DEFAULT_SIZE, 163, Short.MAX_VALUE))
+                                .addComponent(scrollPane3, GroupLayout.DEFAULT_SIZE, 571, Short.MAX_VALUE))
                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                             .addGroup(panel3Layout.createParallelGroup()
-                                .addComponent(scrollPane7, GroupLayout.DEFAULT_SIZE, 199, Short.MAX_VALUE)
-                                .addComponent(scrollPane6, GroupLayout.DEFAULT_SIZE, 199, Short.MAX_VALUE)
-                                .addComponent(scrollPane8, GroupLayout.DEFAULT_SIZE, 199, Short.MAX_VALUE)))
+                                .addComponent(scrollPane7, GroupLayout.DEFAULT_SIZE, 193, Short.MAX_VALUE)
+                                .addComponent(scrollPane6, GroupLayout.DEFAULT_SIZE, 193, Short.MAX_VALUE)
+                                .addComponent(scrollPane8, GroupLayout.DEFAULT_SIZE, 193, Short.MAX_VALUE)))
                 );
                 panel3Layout.setVerticalGroup(
                     panel3Layout.createParallelGroup()
@@ -1009,9 +1407,9 @@ catch (WriteException e1) {
                                                 .addComponent(button1)
                                                 .addComponent(button8))
                                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                            .addComponent(scrollPane2, GroupLayout.DEFAULT_SIZE, 530, Short.MAX_VALUE))
+                                            .addComponent(scrollPane2, GroupLayout.DEFAULT_SIZE, 540, Short.MAX_VALUE))
                                         .addGroup(panel3Layout.createSequentialGroup()
-                                            .addComponent(scrollPane3, GroupLayout.DEFAULT_SIZE, 520, Short.MAX_VALUE)
+                                            .addComponent(scrollPane3, GroupLayout.DEFAULT_SIZE, 528, Short.MAX_VALUE)
                                             .addGap(16, 16, 16)
                                             .addGroup(panel3Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                                 .addComponent(button7)
@@ -1048,7 +1446,7 @@ catch (WriteException e1) {
                             .addGroup(panel4Layout.createParallelGroup()
                                 .addComponent(scrollPane1, GroupLayout.PREFERRED_SIZE, 174, GroupLayout.PREFERRED_SIZE)
                                 .addComponent(button4, GroupLayout.PREFERRED_SIZE, 78, GroupLayout.PREFERRED_SIZE))
-                            .addContainerGap(822, Short.MAX_VALUE))
+                            .addContainerGap(810, Short.MAX_VALUE))
                 );
                 panel4Layout.setVerticalGroup(
                     panel4Layout.createParallelGroup()
@@ -1056,7 +1454,7 @@ catch (WriteException e1) {
                             .addContainerGap()
                             .addComponent(button4)
                             .addGap(18, 18, 18)
-                            .addComponent(scrollPane1, GroupLayout.DEFAULT_SIZE, 518, Short.MAX_VALUE)
+                            .addComponent(scrollPane1, GroupLayout.DEFAULT_SIZE, 528, Short.MAX_VALUE)
                             .addContainerGap())
                 );
             }
@@ -1076,14 +1474,14 @@ catch (WriteException e1) {
                         .addGroup(panel5Layout.createSequentialGroup()
                             .addGap(15, 15, 15)
                             .addComponent(button5)
-                            .addContainerGap(936, Short.MAX_VALUE))
+                            .addContainerGap(920, Short.MAX_VALUE))
                 );
                 panel5Layout.setVerticalGroup(
                     panel5Layout.createParallelGroup()
                         .addGroup(panel5Layout.createSequentialGroup()
                             .addContainerGap()
                             .addComponent(button5)
-                            .addContainerGap(542, Short.MAX_VALUE))
+                            .addContainerGap(552, Short.MAX_VALUE))
                 );
             }
             tabbedPane1.addTab("\u56fe\u7247\u884c\u4e3a", panel5);
@@ -1146,7 +1544,7 @@ catch (WriteException e1) {
                                                     .addGap(1, 1, 1)
                                                     .addComponent(modSub, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                                         .addComponent(txtSubName, GroupLayout.Alignment.TRAILING)
-                                        .addComponent(scrollPane5, GroupLayout.DEFAULT_SIZE, 411, Short.MAX_VALUE))))
+                                        .addComponent(scrollPane5, GroupLayout.DEFAULT_SIZE, 399, Short.MAX_VALUE))))
                             .addGap(387, 387, 387))
                 );
                 panel6Layout.setVerticalGroup(
@@ -1158,7 +1556,7 @@ catch (WriteException e1) {
                                 .addComponent(txtSubName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                             .addGroup(panel6Layout.createParallelGroup()
-                                .addComponent(scrollPane4, GroupLayout.DEFAULT_SIZE, 527, Short.MAX_VALUE)
+                                .addComponent(scrollPane4, GroupLayout.DEFAULT_SIZE, 535, Short.MAX_VALUE)
                                 .addGroup(panel6Layout.createSequentialGroup()
                                     .addComponent(scrollPane5, GroupLayout.PREFERRED_SIZE, 85, GroupLayout.PREFERRED_SIZE)
                                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
@@ -1171,7 +1569,7 @@ catch (WriteException e1) {
                                     .addGroup(panel6Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(addSubject)
                                         .addComponent(modSub))
-                                    .addGap(0, 365, Short.MAX_VALUE)))
+                                    .addGap(0, 383, Short.MAX_VALUE)))
                             .addContainerGap())
                 );
             }
@@ -1197,7 +1595,7 @@ catch (WriteException e1) {
                             .addComponent(out)
                             .addGap(61, 61, 61)
                             .addComponent(tst)
-                            .addContainerGap(761, Short.MAX_VALUE))
+                            .addContainerGap(741, Short.MAX_VALUE))
                 );
                 panel7Layout.setVerticalGroup(
                     panel7Layout.createParallelGroup()
@@ -1206,7 +1604,7 @@ catch (WriteException e1) {
                             .addGroup(panel7Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(out)
                                 .addComponent(tst))
-                            .addContainerGap(509, Short.MAX_VALUE))
+                            .addContainerGap(519, Short.MAX_VALUE))
                 );
             }
             tabbedPane1.addTab("\u4f7f\u7528\u7edf\u8ba1", panel7);
@@ -1216,11 +1614,14 @@ catch (WriteException e1) {
         contentPane.setLayout(contentPaneLayout);
         contentPaneLayout.setHorizontalGroup(
             contentPaneLayout.createParallelGroup()
-                .addComponent(tabbedPane1)
+                .addGroup(GroupLayout.Alignment.TRAILING, contentPaneLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(tabbedPane1)
+                    .addContainerGap())
         );
         contentPaneLayout.setVerticalGroup(
             contentPaneLayout.createParallelGroup()
-                .addComponent(tabbedPane1)
+                .addComponent(tabbedPane1, GroupLayout.Alignment.TRAILING)
         );
         pack();
         setLocationRelativeTo(getOwner());
@@ -1237,7 +1638,25 @@ catch (WriteException e1) {
     private JButton button9;
     private JButton button10;
     private JButton button11;
+    private JButton LoadStu;
+    private JScrollPane scrollPane9;
+    private JList stunamelist;
+    private JScrollPane scrollPane10;
+    private JList classlist;
+    private JScrollPane scrollPane11;
+    private JList listgcstu;
+    private JButton addstudents;
+    private JTextField textField1;
+    private JTextField textField2;
+    private JLabel labelsid;
+    private JButton saveClassAndStu;
+    private JCheckBox checkupyear;
     private JPanel panel2;
+    private JScrollPane scrollPane12;
+    private JList listteanameForClass;
+    private JButton LoadFromServerTea;
+    private JButton ImportFromFileTea;
+    private JButton btnSaveTeaclasstoServer;
     private JPanel panel3;
     private JButton button1;
     private JScrollPane scrollPane2;
