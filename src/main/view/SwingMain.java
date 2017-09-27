@@ -37,6 +37,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import java.io.File;
 import java.io.IOException;
+import java.lang.Boolean;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
@@ -930,9 +931,11 @@ catch (WriteException e1) {
 
                   private void LoadFromServerTeaActionPerformed(ActionEvent e) {
                       // TODO add your code here
-                      //teachers=mdb.getTeas();
+                    //  teachers=mdb.getTeas();
                       //gradeClasses=mdb.getGradeClassesIsActive();
                      // mdb.setIsActiveFalseGradeClass();
+
+
                   }
 
                   private void ImportFromFileTeaActionPerformed(ActionEvent e) {
@@ -942,6 +945,15 @@ catch (WriteException e1) {
                       //班级已经OK，所以班级不新建
 
                       String path = "";
+                      ArrayList<Integer> tids=new ArrayList<>();
+
+                      int itid=10;  //tid 的计算起点
+
+
+                      for(Teacher tea: teachers) {
+                          tids.add(Integer.parseInt(tea.getTid().substring(1)));
+                      }
+
                       JFileChooser chooser = new JFileChooser("D:\\1newbote\\lizhi");
                       FileNameExtensionFilter filter = new FileNameExtensionFilter(
                               "2003~2007 Excel files", "xls");
@@ -954,48 +966,71 @@ catch (WriteException e1) {
                           try {
                               Workbook workbook = Workbook.getWorkbook(new File(path));
                               Sheet sheet = workbook.getSheet(0);
-                              int colss=sheet.getColumns();
+                              int colss = sheet.getColumns();
                               for (int cols = 1; cols < sheet.getColumns(); cols++) {
                                   Cell[] cells = sheet.getColumn(cols);
-                              //获得班级对象
-                                  GradeClass gradeClass=mdb.getGradeClassIsActiveByName(cells[0].getContents());
+                                  //获得班级对象
+                                  GradeClass gradeClass = mdb.getGradeClassIsActiveByName(cells[0].getContents());
 
                                   for (int j = 1; j < cells.length; j++) {
 
-                                      Teacher tea=null;
+                                      Teacher tea = null;
                                       boolean isnothave = true;
 
                                       for (int i = 0; i < teachers.size(); i++) {
 
-                                          if (teachers.get(i).getName().equals( cells[j].getContents())) {
+                                          if (teachers.get(i).getName().equals(cells[j].getContents())) {
                                               // 教师在老名单里面
-                                              tea=teachers.get(i);
+                                              tea = teachers.get(i);
                                               tea.setStatus("在职");
                                               //赋予新班级的信息
                                               tea.setOnDutyGradeClassName(gradeClass.getName());
                                               tea.setOnDutyGradeClassId(gradeClass.get_id());
 
-                                              teachers.set(i,tea);
+                                              teachers.set(i, tea);
                                               isnothave = false;
                                               break;
                                           }
                                       }
 
                                       if (isnothave) {
+
+                                          //建立新老师对象
+
                                           tea = new Teacher(cells[j].getContents());
                                           tea.setOnDutyGradeClassName(gradeClass.getName());
                                           tea.setOnDutyGradeClassId(gradeClass.get_id());
                                           tea.setPwd("123456");
                                           tea.setStatus("在职");
+
+                                          //计算tid
+                                          boolean isNotStop = true;
+
+                                          while (isNotStop) {
+
+                                              itid++;
+
+                                              Boolean result = tids.contains(itid);
+
+                                              if (!result) {
+                                                  isNotStop = false;
+                                              }
+                                          }
+                                          tea.setTid("t" + Integer.toString(itid));
+
+                                          tids.add(itid);
                                           teachers.add(tea);
+
                                       }
 
 
                                   }
-
-
                               }
                           }
+
+
+
+
                           catch (IOException e1) {
                               e1.printStackTrace();
                           } catch (BiffException e1) {
@@ -1008,23 +1043,21 @@ catch (WriteException e1) {
 
                       if (teaname.size()>0) teaname.clear();
                       for(Teacher tea:teachers){
-                          teaname.add(tea.getName()+"  " + tea.getStatus() + " " + tea.get_id().toString());
+                          teaname.add(tea.getName()+"  " + tea.getStatus() + " " + tea.getTid().toString() + " " +tea.getOnDutyGradeClassName());
                       }
                       listteanameForClass.setListData(teaname);
-
-
-
-                      gclist.clear();
-
-                      for(GradeClass gc:gradeClasses){
-                          gclist.add(gc.getName());
-                      }
-                      classlist.setListData(gclist);
+System.out.print("");
                   }
 
                   private void btnSaveTeaclasstoServerActionPerformed(ActionEvent e) {
                       // TODO add your code here
-                      mdb.saveTeachers(teachers);
+                      //mdb.saveTeachers(teachers);
+
+                      if (teaname.size()>0) teaname.clear();
+                      for(Teacher tea:teachers){
+                          teaname.add(tea.getName()+"  " + tea.getStatus() + " " + tea.getTid().toString() + " " +tea.getOnDutyGradeClassName());
+                      }
+                      listteanameForClass.setListData(teaname);
 
                   }
 
