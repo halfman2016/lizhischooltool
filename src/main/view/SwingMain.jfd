@@ -75,6 +75,7 @@ new FormModel {
 					add( new FormComponent( "javax.swing.JButton" ) {
 						name: "addstudents"
 						"text": "导入学生"
+						"enabled": false
 						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "addstudentsActionPerformed", true ) )
 					} )
 					add( new FormComponent( "javax.swing.JTextField" ) {
@@ -118,6 +119,7 @@ new FormModel {
 					add( new FormComponent( "javax.swing.JButton" ) {
 						name: "ImportFromFileTea"
 						"text": "从文件导入"
+						"enabled": false
 						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "ImportFromFileTeaActionPerformed", true ) )
 					} )
 					add( new FormComponent( "javax.swing.JButton" ) {

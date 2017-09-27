@@ -39,7 +39,7 @@ public class MDBTools {
     private MongoDatabase mongoDatabase;
     private MongoCollection<Document> mongoCollection = null;
 
-    private String mode = "test"; // test release 2种模式切换
+    private String mode = "release"; // test release 2种模式切换
 
 
     public MDBTools() {
