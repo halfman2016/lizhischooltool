@@ -1061,6 +1061,22 @@ System.out.print("");
 
                   }
 
+                  private void addteacherActionPerformed(ActionEvent e) {
+                      // TODO add your code here
+                      Teacher tea = new Teacher("王宇珅");
+                      tea.setPwd("123123");
+                      tea.setOnDutyGradeClassId(UUID.fromString("7a07ac76-035b-448d-aee9-5502ed12e9f4"));
+                      tea.setOnDutyGradeClassName("八3班");
+                      tea.setTid("t83");
+                      mdb.addTea(tea);
+                       tea = new Teacher("张治国");
+                      tea.setPwd("123123");
+                      tea.setOnDutyGradeClassId(UUID.fromString("5d67ca96-4c06-4675-8031-564a42bd8f8f"));
+                      tea.setOnDutyGradeClassName("八2班");
+                      tea.setTid("t84");
+                      mdb.addTea(tea);
+                  }
+
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         tabbedPane1 = new JTabbedPane();
@@ -1084,6 +1100,7 @@ System.out.print("");
         labelsid = new JLabel();
         saveClassAndStu = new JButton();
         checkupyear = new JCheckBox();
+        addteacher = new JButton();
         panel2 = new JPanel();
         scrollPane12 = new JScrollPane();
         listteanameForClass = new JList();
@@ -1192,6 +1209,7 @@ System.out.print("");
 
                 //---- addstudents ----
                 addstudents.setText("\u5bfc\u5165\u5b66\u751f");
+                addstudents.setEnabled(false);
                 addstudents.addActionListener(e -> addstudentsActionPerformed(e));
 
                 //---- labelsid ----
@@ -1203,6 +1221,10 @@ System.out.print("");
 
                 //---- checkupyear ----
                 checkupyear.setText("\u5b66\u5e74\u5207\u6362\uff08\u539f\u73ed\u7ea7\u4f5c\u5e9f\uff09");
+
+                //---- addteacher ----
+                addteacher.setText("\u589e\u52a0\u6559\u5e08");
+                addteacher.addActionListener(e -> addteacherActionPerformed(e));
 
                 GroupLayout panel1Layout = new GroupLayout(panel1);
                 panel1.setLayout(panel1Layout);
@@ -1229,25 +1251,30 @@ System.out.print("");
                                     .addContainerGap(318, Short.MAX_VALUE))
                                 .addGroup(panel1Layout.createSequentialGroup()
                                     .addGroup(panel1Layout.createParallelGroup()
-                                        .addGroup(GroupLayout.Alignment.TRAILING, panel1Layout.createSequentialGroup()
-                                            .addComponent(saveClassAndStu, GroupLayout.PREFERRED_SIZE, 186, GroupLayout.PREFERRED_SIZE)
-                                            .addGap(73, 73, 73))
                                         .addGroup(panel1Layout.createSequentialGroup()
                                             .addGroup(panel1Layout.createParallelGroup()
+                                                .addGroup(GroupLayout.Alignment.TRAILING, panel1Layout.createSequentialGroup()
+                                                    .addComponent(saveClassAndStu, GroupLayout.PREFERRED_SIZE, 186, GroupLayout.PREFERRED_SIZE)
+                                                    .addGap(73, 73, 73))
                                                 .addGroup(panel1Layout.createSequentialGroup()
-                                                    .addComponent(addstudents)
-                                                    .addGap(18, 18, 18)
-                                                    .addComponent(checkupyear))
-                                                .addComponent(scrollPane10, GroupLayout.PREFERRED_SIZE, 202, GroupLayout.PREFERRED_SIZE))
-                                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)))
-                                    .addComponent(scrollPane11, GroupLayout.PREFERRED_SIZE, 180, GroupLayout.PREFERRED_SIZE)
-                                    .addGap(18, 18, 18)
-                                    .addGroup(panel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-                                        .addComponent(labelsid, GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE)
-                                        .addComponent(textField1, GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE))
-                                    .addGap(41, 41, 41)
-                                    .addComponent(textField2, GroupLayout.PREFERRED_SIZE, 66, GroupLayout.PREFERRED_SIZE)
-                                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 81, Short.MAX_VALUE)
+                                                    .addGroup(panel1Layout.createParallelGroup()
+                                                        .addGroup(panel1Layout.createSequentialGroup()
+                                                            .addComponent(addstudents)
+                                                            .addGap(18, 18, 18)
+                                                            .addComponent(checkupyear))
+                                                        .addComponent(scrollPane10, GroupLayout.PREFERRED_SIZE, 202, GroupLayout.PREFERRED_SIZE))
+                                                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)))
+                                            .addComponent(scrollPane11, GroupLayout.PREFERRED_SIZE, 180, GroupLayout.PREFERRED_SIZE)
+                                            .addGap(18, 18, 18)
+                                            .addGroup(panel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
+                                                .addComponent(labelsid, GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE)
+                                                .addComponent(textField1, GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE))
+                                            .addGap(41, 41, 41)
+                                            .addComponent(textField2, GroupLayout.PREFERRED_SIZE, 66, GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(panel1Layout.createSequentialGroup()
+                                            .addGap(290, 290, 290)
+                                            .addComponent(addteacher)))
+                                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 85, Short.MAX_VALUE)
                                     .addComponent(scrollPane9, GroupLayout.PREFERRED_SIZE, 215, GroupLayout.PREFERRED_SIZE)
                                     .addGap(15, 15, 15))))
                 );
@@ -1272,7 +1299,7 @@ System.out.print("");
                                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                     .addGroup(panel1Layout.createParallelGroup()
                                         .addGroup(panel1Layout.createSequentialGroup()
-                                            .addComponent(scrollPane9, GroupLayout.DEFAULT_SIZE, 505, Short.MAX_VALUE)
+                                            .addComponent(scrollPane9, GroupLayout.DEFAULT_SIZE, 503, Short.MAX_VALUE)
                                             .addContainerGap())
                                         .addGroup(panel1Layout.createSequentialGroup()
                                             .addGroup(panel1Layout.createParallelGroup()
@@ -1283,7 +1310,9 @@ System.out.print("");
                                                     .addGroup(panel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                                         .addComponent(addstudents)
                                                         .addComponent(checkupyear))))
-                                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 143, Short.MAX_VALUE)
+                                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 96, Short.MAX_VALUE)
+                                            .addComponent(addteacher)
+                                            .addGap(13, 13, 13)
                                             .addComponent(saveClassAndStu, GroupLayout.PREFERRED_SIZE, 39, GroupLayout.PREFERRED_SIZE)
                                             .addGap(32, 32, 32))))
                                 .addGroup(GroupLayout.Alignment.LEADING, panel1Layout.createSequentialGroup()
@@ -1312,6 +1341,7 @@ System.out.print("");
 
                 //---- ImportFromFileTea ----
                 ImportFromFileTea.setText("\u4ece\u6587\u4ef6\u5bfc\u5165");
+                ImportFromFileTea.setEnabled(false);
                 ImportFromFileTea.addActionListener(e -> ImportFromFileTeaActionPerformed(e));
 
                 //---- btnSaveTeaclasstoServer ----
@@ -1331,7 +1361,7 @@ System.out.print("");
                                     .addComponent(LoadFromServerTea, GroupLayout.PREFERRED_SIZE, 137, GroupLayout.PREFERRED_SIZE)
                                     .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                                     .addComponent(ImportFromFileTea, GroupLayout.PREFERRED_SIZE, 112, GroupLayout.PREFERRED_SIZE)))
-                            .addContainerGap(702, Short.MAX_VALUE))
+                            .addContainerGap(716, Short.MAX_VALUE))
                 );
                 panel2Layout.setVerticalGroup(
                     panel2Layout.createParallelGroup()
@@ -1344,7 +1374,7 @@ System.out.print("");
                             .addComponent(scrollPane12, GroupLayout.PREFERRED_SIZE, 485, GroupLayout.PREFERRED_SIZE)
                             .addGap(18, 18, 18)
                             .addComponent(btnSaveTeaclasstoServer)
-                            .addContainerGap(17, Short.MAX_VALUE))
+                            .addContainerGap(15, Short.MAX_VALUE))
                 );
             }
             tabbedPane1.addTab("\u6559\u5e08\u914d\u7f6e", panel2);
@@ -1414,13 +1444,13 @@ System.out.print("");
                                     .addGap(22, 22, 22)
                                     .addComponent(txtPicDateTime, GroupLayout.PREFERRED_SIZE, 254, GroupLayout.PREFERRED_SIZE)
                                     .addGap(132, 132, 132)
-                                    .addComponent(button7, GroupLayout.DEFAULT_SIZE, 163, Short.MAX_VALUE))
-                                .addComponent(scrollPane3, GroupLayout.DEFAULT_SIZE, 571, Short.MAX_VALUE))
+                                    .addComponent(button7, GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE))
+                                .addComponent(scrollPane3, GroupLayout.DEFAULT_SIZE, 578, Short.MAX_VALUE))
                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                             .addGroup(panel3Layout.createParallelGroup()
-                                .addComponent(scrollPane7, GroupLayout.DEFAULT_SIZE, 193, Short.MAX_VALUE)
-                                .addComponent(scrollPane6, GroupLayout.DEFAULT_SIZE, 193, Short.MAX_VALUE)
-                                .addComponent(scrollPane8, GroupLayout.DEFAULT_SIZE, 193, Short.MAX_VALUE)))
+                                .addComponent(scrollPane7, GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
+                                .addComponent(scrollPane6, GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
+                                .addComponent(scrollPane8, GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)))
                 );
                 panel3Layout.setVerticalGroup(
                     panel3Layout.createParallelGroup()
@@ -1431,7 +1461,7 @@ System.out.print("");
                                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                     .addComponent(scrollPane7)
                                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(scrollPane8, GroupLayout.DEFAULT_SIZE, 221, Short.MAX_VALUE))
+                                    .addComponent(scrollPane8, GroupLayout.DEFAULT_SIZE, 242, Short.MAX_VALUE))
                                 .addGroup(panel3Layout.createSequentialGroup()
                                     .addContainerGap()
                                     .addGroup(panel3Layout.createParallelGroup()
@@ -1440,9 +1470,9 @@ System.out.print("");
                                                 .addComponent(button1)
                                                 .addComponent(button8))
                                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                            .addComponent(scrollPane2, GroupLayout.DEFAULT_SIZE, 540, Short.MAX_VALUE))
+                                            .addComponent(scrollPane2, GroupLayout.DEFAULT_SIZE, 547, Short.MAX_VALUE))
                                         .addGroup(panel3Layout.createSequentialGroup()
-                                            .addComponent(scrollPane3, GroupLayout.DEFAULT_SIZE, 528, Short.MAX_VALUE)
+                                            .addComponent(scrollPane3, GroupLayout.DEFAULT_SIZE, 537, Short.MAX_VALUE)
                                             .addGap(16, 16, 16)
                                             .addGroup(panel3Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                                 .addComponent(button7)
@@ -1479,7 +1509,7 @@ System.out.print("");
                             .addGroup(panel4Layout.createParallelGroup()
                                 .addComponent(scrollPane1, GroupLayout.PREFERRED_SIZE, 174, GroupLayout.PREFERRED_SIZE)
                                 .addComponent(button4, GroupLayout.PREFERRED_SIZE, 78, GroupLayout.PREFERRED_SIZE))
-                            .addContainerGap(810, Short.MAX_VALUE))
+                            .addContainerGap(824, Short.MAX_VALUE))
                 );
                 panel4Layout.setVerticalGroup(
                     panel4Layout.createParallelGroup()
@@ -1487,7 +1517,7 @@ System.out.print("");
                             .addContainerGap()
                             .addComponent(button4)
                             .addGap(18, 18, 18)
-                            .addComponent(scrollPane1, GroupLayout.DEFAULT_SIZE, 528, Short.MAX_VALUE)
+                            .addComponent(scrollPane1, GroupLayout.DEFAULT_SIZE, 535, Short.MAX_VALUE)
                             .addContainerGap())
                 );
             }
@@ -1507,14 +1537,14 @@ System.out.print("");
                         .addGroup(panel5Layout.createSequentialGroup()
                             .addGap(15, 15, 15)
                             .addComponent(button5)
-                            .addContainerGap(920, Short.MAX_VALUE))
+                            .addContainerGap(935, Short.MAX_VALUE))
                 );
                 panel5Layout.setVerticalGroup(
                     panel5Layout.createParallelGroup()
                         .addGroup(panel5Layout.createSequentialGroup()
                             .addContainerGap()
                             .addComponent(button5)
-                            .addContainerGap(552, Short.MAX_VALUE))
+                            .addContainerGap(559, Short.MAX_VALUE))
                 );
             }
             tabbedPane1.addTab("\u56fe\u7247\u884c\u4e3a", panel5);
@@ -1577,7 +1607,7 @@ System.out.print("");
                                                     .addGap(1, 1, 1)
                                                     .addComponent(modSub, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                                         .addComponent(txtSubName, GroupLayout.Alignment.TRAILING)
-                                        .addComponent(scrollPane5, GroupLayout.DEFAULT_SIZE, 399, Short.MAX_VALUE))))
+                                        .addComponent(scrollPane5, GroupLayout.DEFAULT_SIZE, 413, Short.MAX_VALUE))))
                             .addGap(387, 387, 387))
                 );
                 panel6Layout.setVerticalGroup(
@@ -1589,7 +1619,7 @@ System.out.print("");
                                 .addComponent(txtSubName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                             .addGroup(panel6Layout.createParallelGroup()
-                                .addComponent(scrollPane4, GroupLayout.DEFAULT_SIZE, 535, Short.MAX_VALUE)
+                                .addComponent(scrollPane4, GroupLayout.DEFAULT_SIZE, 544, Short.MAX_VALUE)
                                 .addGroup(panel6Layout.createSequentialGroup()
                                     .addComponent(scrollPane5, GroupLayout.PREFERRED_SIZE, 85, GroupLayout.PREFERRED_SIZE)
                                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
@@ -1602,7 +1632,7 @@ System.out.print("");
                                     .addGroup(panel6Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(addSubject)
                                         .addComponent(modSub))
-                                    .addGap(0, 383, Short.MAX_VALUE)))
+                                    .addGap(0, 384, Short.MAX_VALUE)))
                             .addContainerGap())
                 );
             }
@@ -1628,7 +1658,7 @@ System.out.print("");
                             .addComponent(out)
                             .addGap(61, 61, 61)
                             .addComponent(tst)
-                            .addContainerGap(741, Short.MAX_VALUE))
+                            .addContainerGap(756, Short.MAX_VALUE))
                 );
                 panel7Layout.setVerticalGroup(
                     panel7Layout.createParallelGroup()
@@ -1637,7 +1667,7 @@ System.out.print("");
                             .addGroup(panel7Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(out)
                                 .addComponent(tst))
-                            .addContainerGap(519, Short.MAX_VALUE))
+                            .addContainerGap(526, Short.MAX_VALUE))
                 );
             }
             tabbedPane1.addTab("\u4f7f\u7528\u7edf\u8ba1", panel7);
@@ -1684,6 +1714,7 @@ System.out.print("");
     private JLabel labelsid;
     private JButton saveClassAndStu;
     private JCheckBox checkupyear;
+    private JButton addteacher;
     private JPanel panel2;
     private JScrollPane scrollPane12;
     private JList listteanameForClass;
