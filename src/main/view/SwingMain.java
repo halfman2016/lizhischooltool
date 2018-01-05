@@ -6,20 +6,10 @@ package main.view;
 
 import java.beans.*;
 import javax.swing.event.*;
-import com.qiniu.common.QiniuException;
-import com.qiniu.common.Zone;
-import com.qiniu.http.Response;
-import com.qiniu.storage.BucketManager;
-import com.qiniu.storage.Configuration;
-import com.qiniu.storage.model.FileInfo;
-import com.qiniu.storage.model.FileListing;
-import com.qiniu.util.Auth;
-import javafx.application.Application;
+
 import jxl.Cell;
 import jxl.Sheet;
 import jxl.Workbook;
-import jxl.format.Colour;
-import jxl.format.UnderlineStyle;
 import jxl.read.biff.BiffException;
 import jxl.write.*;
 import jxl.write.Label;
@@ -27,19 +17,15 @@ import jxl.write.biff.RowsExceededException;
 import main.Module.*;
 import main.util.MDBTools;
 import main.util.MySqlTools;
-import main.util.Utils;
 
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.GroupLayout;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.DefaultTableModel;
 import java.io.File;
 import java.io.IOException;
 import java.lang.Boolean;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -63,7 +49,7 @@ public class SwingMain extends JFrame {
     ArrayList<Teacher> teachers;
     ArrayList<Student> students;  //学生清单
     ArrayList<Student> gcstudents; //班级学生清单
-    ArrayList<GradeClass> gradeClasses;  //班级清单
+    List<GradeClass> gradeClasses;  //班级清单
 
 
     String timelabel;
@@ -290,8 +276,6 @@ public class SwingMain extends JFrame {
 //                Utils.downLoadFromUrl("http://lizhibutian.boteteam.com/"+fileInfo.key,fileInfo.key+".jpeg","D:\\1newbote\\lizhi\\serverpic");
 //                listname.add(fileInfo.key);
 //                System.out.println(fileInfo.key);
-//
-//
 //
 //            }
 //
@@ -842,7 +826,7 @@ catch (WriteException e1) {
                               "2003~2007 Excel files", "xls");
                       chooser.setFileFilter(filter);
                       int ii = chooser.showOpenDialog(null);
-                      if (ii == chooser.APPROVE_OPTION) {
+                      if (ii == JFileChooser.APPROVE_OPTION) {
                           path = chooser.getSelectedFile().getAbsolutePath();
 
 
@@ -959,7 +943,7 @@ catch (WriteException e1) {
                               "2003~2007 Excel files", "xls");
                       chooser.setFileFilter(filter);
                       int ii = chooser.showOpenDialog(null);
-                      if (ii == chooser.APPROVE_OPTION) {
+                      if (ii == JFileChooser.APPROVE_OPTION) {
                           path = chooser.getSelectedFile().getAbsolutePath();
 
 
@@ -1053,7 +1037,12 @@ System.out.print("");
                       // TODO add your code here
                       //mdb.saveTeachers(teachers);
 
-                      if (teaname.size()>0) teaname.clear();
+                      if (teaname.size()>0)
+                          {
+
+                              teaname.clear();
+                          }
+
                       for(Teacher tea:teachers){
                           teaname.add(tea.getName()+"  " + tea.getStatus() + " " + tea.getTid().toString() + " " +tea.getOnDutyGradeClassName());
                       }
@@ -1076,6 +1065,171 @@ System.out.print("");
                       tea.setTid("t84");
                       mdb.addTea(tea);
                   }
+
+                  private void downloadPicsActionPerformed(ActionEvent e) {
+                      // TODO add your code here
+
+                  }
+
+                  private void exportActionDataActionPerformed(ActionEvent e) {
+
+        List <Photopic> photos=mdb.getAllPics();
+                      File file=new File("picout.xls");
+
+                      try {
+                          WritableWorkbook workbook=Workbook.createWorkbook(file);
+                          WritableSheet sheet=workbook.createSheet("图片清单",0);
+                          jxl.write.Label label=new Label(0,0,"拍摄人");
+
+                          sheet.addCell(label);
+                          label=new Label(1,0,"拍摄时间");
+                          sheet.addCell(label);
+                          label=new Label(2,0,"拍摄标注");
+                          sheet.addCell(label);
+                          label=new Label(3,0,"拍摄图像名");
+                          sheet.addCell(label);
+                          int i=1;
+                          for (Photopic photopic:photos)
+                          {
+                              label=new Label(0,i,photopic.getPhotoauthor());
+                              sheet.addCell(label);
+                              SimpleDateFormat sdf=new SimpleDateFormat("MMM d, yyyy h:mm:ss a");
+                              label=new Label(1,i,sdf.format(photopic.getPhotodate()));
+                              sheet.addCell(label);
+                              label=new Label(2,i,photopic.getPhotomemo());
+                              sheet.addCell(label);
+                              label=new Label(3,i,photopic.getPicname());
+                              sheet.addCell(label);
+
+                              i=i+1;
+
+                          }
+                          workbook.write();
+                          workbook.close();
+
+
+                      } catch (IOException e1) {
+
+                          e1.printStackTrace();
+                      } catch (RowsExceededException e1) {
+                          e1.printStackTrace();
+                      } catch (WriteException e1) {
+                          e1.printStackTrace();
+                      }
+
+
+                  }
+
+                  private void btnExportTypeFileActionPerformed(ActionEvent e) {
+                      // 导出各种分类文件
+                      // 按这几个部分（一日常规、上课纪律、校园活动、专题活动）分类
+                      // 图片按照标注来命名，便于后期制作。//统计当前班级，不统计之前班级？
+                      // 1、读取所有数据到内存
+                      List<Student> students=mdb.getStus();
+                      List<Teacher> teachers=mdb.getTeas();
+                      List<Photopic> photopics=mdb.getAllPics();
+                      List<Photopic> subjectpics=mdb.getSubjectPhotos();
+                      List<Photopic> freepics=mdb.getfreePhotopic();
+                      List<PicPinAction> picPinActions=mdb.getPicPinActions();
+                      List<PinAction> pinActions=mdb.getPinActions();
+                      List<Subject> subjects=mdb.getSubjects();
+                      List<GradeClass> allclasses=mdb.getGradeClasses();
+
+                      List<DayCheckListAction> shangkedayCheckListActions=mdb.getDayCheckListActions("上课纪律检查");
+                      List<DayCheckListAction> zaochengdayCheckListActions=mdb.getDayCheckListActions("早晨宿舍检查");
+                      List<DayCheckRec> dayCheckRecs=mdb.getAllDaychecks();
+
+                      //开始分类
+
+                     // 按班级分：以前的，现在的？ 现在的
+
+                      //
+//                    List <UUID> classesid=new ArrayList<>();
+//                    for(GradeClass gc:allclasses){
+//                        classesid.add(gc.get_id());
+//                    }
+
+              //      ReportDayChecked suseChecked=new ReportDayChecked(dayCheckRecs);
+             //         suseChecked.saveToFile();
+
+                      //一个图片说明
+                      //专题图片。自由图片
+       // ReportSubjectPics reportSubjectPics=new ReportSubjectPics(subjectpics);
+        //reportSubjectPics.saveToFile();
+
+                      //自由图片导出
+
+                      ReportFreePics reportFreePics=new ReportFreePics(freepics);
+                      reportFreePics.saveToFile();
+                      //图片行为统计
+                      //修改文件名，已经成功
+//                      JFileChooser chooser = new JFileChooser();
+//                      chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+//                      int flag = chooser.showOpenDialog(null);
+//                        if (flag==JFileChooser.APPROVE_OPTION)
+//                        {
+//                            File f=null;
+//                            f=chooser.getSelectedFile();
+//                            ReNameFiles(f.getPath(),photopics);
+//                        }
+
+            System.out.print("holo");
+                  }
+
+    public void ReNameFiles(String path,List<Photopic> photopics){
+        List<File> files=getFileList(path);
+        List<String> newnames=new ArrayList<>();
+        for(File file:files)
+        {
+            String strname=file.getName();
+            strname=getFileNameNoEx(strname);
+            for(Photopic photopic:photopics){
+                if (photopic.getPicname().equals(strname))
+                {
+                    if(photopic.getBelongToSubject()!=null)
+                    {
+                        strname = strname + "_"+photopic.getPhotoauthor() + "_"+photopic.getPhotomemo() + "_"+ (mdb.getSubject(photopic.getBelongToSubject().toString())).getSubjectName();
+                    }
+                    else
+                    {
+                        strname = strname + "_"+photopic.getPhotoauthor() +"_"+ photopic.getPhotomemo() ;
+
+                    }
+
+                    }
+            }
+            strname=strname+".jpg";
+            newnames.add(strname);
+
+            String aa=file.getParent();
+            file.renameTo(new File(file.getParent()+File.separator+strname));
+
+        }
+    }
+
+    String getFileNameNoEx(String filename) {
+    if((filename!=null)&&(filename.length()>0)){
+int dot=filename.lastIndexOf('.');
+if((dot>-1)&&(dot<(filename.length()))){
+return filename.substring(0,dot); }
+}
+return filename;
+}
+    private List<File> getFileList(String strPath) {
+        File dir = new File(strPath);
+        List <File> filelist=new ArrayList<>();
+        File[] files = dir.listFiles(); // 该文件目录下文件全部放入数组
+        if (files != null) {
+            for (int i = 0; i < files.length; i++) {
+                String fileName = files[i].getName();
+                String strFileName = files[i].getAbsolutePath();
+                filelist.add(files[i]);
+
+            }
+
+        }
+        return filelist;
+    }
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
@@ -1143,6 +1297,11 @@ System.out.print("");
         panel7 = new JPanel();
         out = new JButton();
         tst = new JButton();
+        panel8 = new JPanel();
+        downloadPics = new JButton();
+        exportActionData = new JButton();
+        btnExportTypeFile = new JButton();
+        btnModifyFileNames = new JButton();
 
         //======== this ========
         addWindowListener(new WindowAdapter() {
@@ -1274,7 +1433,7 @@ System.out.print("");
                                         .addGroup(panel1Layout.createSequentialGroup()
                                             .addGap(290, 290, 290)
                                             .addComponent(addteacher)))
-                                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 85, Short.MAX_VALUE)
+                                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 81, Short.MAX_VALUE)
                                     .addComponent(scrollPane9, GroupLayout.PREFERRED_SIZE, 215, GroupLayout.PREFERRED_SIZE)
                                     .addGap(15, 15, 15))))
                 );
@@ -1299,7 +1458,7 @@ System.out.print("");
                                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                     .addGroup(panel1Layout.createParallelGroup()
                                         .addGroup(panel1Layout.createSequentialGroup()
-                                            .addComponent(scrollPane9, GroupLayout.DEFAULT_SIZE, 503, Short.MAX_VALUE)
+                                            .addComponent(scrollPane9, GroupLayout.DEFAULT_SIZE, 505, Short.MAX_VALUE)
                                             .addContainerGap())
                                         .addGroup(panel1Layout.createSequentialGroup()
                                             .addGroup(panel1Layout.createParallelGroup()
@@ -1310,7 +1469,7 @@ System.out.print("");
                                                     .addGroup(panel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                                         .addComponent(addstudents)
                                                         .addComponent(checkupyear))))
-                                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 96, Short.MAX_VALUE)
+                                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 107, Short.MAX_VALUE)
                                             .addComponent(addteacher)
                                             .addGap(13, 13, 13)
                                             .addComponent(saveClassAndStu, GroupLayout.PREFERRED_SIZE, 39, GroupLayout.PREFERRED_SIZE)
@@ -1361,7 +1520,7 @@ System.out.print("");
                                     .addComponent(LoadFromServerTea, GroupLayout.PREFERRED_SIZE, 137, GroupLayout.PREFERRED_SIZE)
                                     .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                                     .addComponent(ImportFromFileTea, GroupLayout.PREFERRED_SIZE, 112, GroupLayout.PREFERRED_SIZE)))
-                            .addContainerGap(716, Short.MAX_VALUE))
+                            .addContainerGap(702, Short.MAX_VALUE))
                 );
                 panel2Layout.setVerticalGroup(
                     panel2Layout.createParallelGroup()
@@ -1374,7 +1533,7 @@ System.out.print("");
                             .addComponent(scrollPane12, GroupLayout.PREFERRED_SIZE, 485, GroupLayout.PREFERRED_SIZE)
                             .addGap(18, 18, 18)
                             .addComponent(btnSaveTeaclasstoServer)
-                            .addContainerGap(15, Short.MAX_VALUE))
+                            .addContainerGap(17, Short.MAX_VALUE))
                 );
             }
             tabbedPane1.addTab("\u6559\u5e08\u914d\u7f6e", panel2);
@@ -1444,13 +1603,13 @@ System.out.print("");
                                     .addGap(22, 22, 22)
                                     .addComponent(txtPicDateTime, GroupLayout.PREFERRED_SIZE, 254, GroupLayout.PREFERRED_SIZE)
                                     .addGap(132, 132, 132)
-                                    .addComponent(button7, GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE))
-                                .addComponent(scrollPane3, GroupLayout.DEFAULT_SIZE, 578, Short.MAX_VALUE))
+                                    .addComponent(button7, GroupLayout.DEFAULT_SIZE, 163, Short.MAX_VALUE))
+                                .addComponent(scrollPane3, GroupLayout.DEFAULT_SIZE, 571, Short.MAX_VALUE))
                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                             .addGroup(panel3Layout.createParallelGroup()
-                                .addComponent(scrollPane7, GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
-                                .addComponent(scrollPane6, GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
-                                .addComponent(scrollPane8, GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)))
+                                .addComponent(scrollPane7, GroupLayout.DEFAULT_SIZE, 193, Short.MAX_VALUE)
+                                .addComponent(scrollPane6, GroupLayout.DEFAULT_SIZE, 193, Short.MAX_VALUE)
+                                .addComponent(scrollPane8, GroupLayout.DEFAULT_SIZE, 193, Short.MAX_VALUE)))
                 );
                 panel3Layout.setVerticalGroup(
                     panel3Layout.createParallelGroup()
@@ -1459,9 +1618,9 @@ System.out.print("");
                                 .addGroup(panel3Layout.createSequentialGroup()
                                     .addComponent(scrollPane6, GroupLayout.PREFERRED_SIZE, 187, GroupLayout.PREFERRED_SIZE)
                                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(scrollPane7)
+                                    .addComponent(scrollPane7, GroupLayout.DEFAULT_SIZE, 144, Short.MAX_VALUE)
                                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(scrollPane8, GroupLayout.DEFAULT_SIZE, 242, Short.MAX_VALUE))
+                                    .addComponent(scrollPane8, GroupLayout.DEFAULT_SIZE, 232, Short.MAX_VALUE))
                                 .addGroup(panel3Layout.createSequentialGroup()
                                     .addContainerGap()
                                     .addGroup(panel3Layout.createParallelGroup()
@@ -1470,9 +1629,9 @@ System.out.print("");
                                                 .addComponent(button1)
                                                 .addComponent(button8))
                                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                            .addComponent(scrollPane2, GroupLayout.DEFAULT_SIZE, 547, Short.MAX_VALUE))
+                                            .addComponent(scrollPane2, GroupLayout.DEFAULT_SIZE, 540, Short.MAX_VALUE))
                                         .addGroup(panel3Layout.createSequentialGroup()
-                                            .addComponent(scrollPane3, GroupLayout.DEFAULT_SIZE, 537, Short.MAX_VALUE)
+                                            .addComponent(scrollPane3, GroupLayout.DEFAULT_SIZE, 528, Short.MAX_VALUE)
                                             .addGap(16, 16, 16)
                                             .addGroup(panel3Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                                 .addComponent(button7)
@@ -1509,7 +1668,7 @@ System.out.print("");
                             .addGroup(panel4Layout.createParallelGroup()
                                 .addComponent(scrollPane1, GroupLayout.PREFERRED_SIZE, 174, GroupLayout.PREFERRED_SIZE)
                                 .addComponent(button4, GroupLayout.PREFERRED_SIZE, 78, GroupLayout.PREFERRED_SIZE))
-                            .addContainerGap(824, Short.MAX_VALUE))
+                            .addContainerGap(810, Short.MAX_VALUE))
                 );
                 panel4Layout.setVerticalGroup(
                     panel4Layout.createParallelGroup()
@@ -1517,7 +1676,7 @@ System.out.print("");
                             .addContainerGap()
                             .addComponent(button4)
                             .addGap(18, 18, 18)
-                            .addComponent(scrollPane1, GroupLayout.DEFAULT_SIZE, 535, Short.MAX_VALUE)
+                            .addComponent(scrollPane1, GroupLayout.DEFAULT_SIZE, 528, Short.MAX_VALUE)
                             .addContainerGap())
                 );
             }
@@ -1537,14 +1696,14 @@ System.out.print("");
                         .addGroup(panel5Layout.createSequentialGroup()
                             .addGap(15, 15, 15)
                             .addComponent(button5)
-                            .addContainerGap(935, Short.MAX_VALUE))
+                            .addContainerGap(920, Short.MAX_VALUE))
                 );
                 panel5Layout.setVerticalGroup(
                     panel5Layout.createParallelGroup()
                         .addGroup(panel5Layout.createSequentialGroup()
                             .addContainerGap()
                             .addComponent(button5)
-                            .addContainerGap(559, Short.MAX_VALUE))
+                            .addContainerGap(552, Short.MAX_VALUE))
                 );
             }
             tabbedPane1.addTab("\u56fe\u7247\u884c\u4e3a", panel5);
@@ -1607,7 +1766,7 @@ System.out.print("");
                                                     .addGap(1, 1, 1)
                                                     .addComponent(modSub, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                                         .addComponent(txtSubName, GroupLayout.Alignment.TRAILING)
-                                        .addComponent(scrollPane5, GroupLayout.DEFAULT_SIZE, 413, Short.MAX_VALUE))))
+                                        .addComponent(scrollPane5, GroupLayout.DEFAULT_SIZE, 399, Short.MAX_VALUE))))
                             .addGap(387, 387, 387))
                 );
                 panel6Layout.setVerticalGroup(
@@ -1619,7 +1778,7 @@ System.out.print("");
                                 .addComponent(txtSubName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                             .addGroup(panel6Layout.createParallelGroup()
-                                .addComponent(scrollPane4, GroupLayout.DEFAULT_SIZE, 544, Short.MAX_VALUE)
+                                .addComponent(scrollPane4, GroupLayout.DEFAULT_SIZE, 535, Short.MAX_VALUE)
                                 .addGroup(panel6Layout.createSequentialGroup()
                                     .addComponent(scrollPane5, GroupLayout.PREFERRED_SIZE, 85, GroupLayout.PREFERRED_SIZE)
                                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
@@ -1632,7 +1791,7 @@ System.out.print("");
                                     .addGroup(panel6Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(addSubject)
                                         .addComponent(modSub))
-                                    .addGap(0, 384, Short.MAX_VALUE)))
+                                    .addGap(0, 383, Short.MAX_VALUE)))
                             .addContainerGap())
                 );
             }
@@ -1658,7 +1817,7 @@ System.out.print("");
                             .addComponent(out)
                             .addGap(61, 61, 61)
                             .addComponent(tst)
-                            .addContainerGap(756, Short.MAX_VALUE))
+                            .addContainerGap(741, Short.MAX_VALUE))
                 );
                 panel7Layout.setVerticalGroup(
                     panel7Layout.createParallelGroup()
@@ -1667,10 +1826,61 @@ System.out.print("");
                             .addGroup(panel7Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(out)
                                 .addComponent(tst))
-                            .addContainerGap(526, Short.MAX_VALUE))
+                            .addContainerGap(519, Short.MAX_VALUE))
                 );
             }
             tabbedPane1.addTab("\u4f7f\u7528\u7edf\u8ba1", panel7);
+
+            //======== panel8 ========
+            {
+
+                //---- downloadPics ----
+                downloadPics.setText("\u4e0b\u8f7d\u670d\u52a1\u5668\u4e0a\u56fe\u7247\u5230\u6307\u5b9a\u76ee\u5f55");
+                downloadPics.addActionListener(e -> downloadPicsActionPerformed(e));
+
+                //---- exportActionData ----
+                exportActionData.setText("\u5bfc\u51fa\u884c\u4e3a\u6570\u636e\u5230\u6307\u5b9a\u76ee\u5f55");
+                exportActionData.addActionListener(e -> exportActionDataActionPerformed(e));
+
+                //---- btnExportTypeFile ----
+                btnExportTypeFile.setText("1\u3001\u5bfc\u51fa\u5206\u7c7b\u6587\u4ef6");
+                btnExportTypeFile.addActionListener(e -> btnExportTypeFileActionPerformed(e));
+
+                //---- btnModifyFileNames ----
+                btnModifyFileNames.setText("2\u3001\u4fee\u6539\u6587\u4ef6\u540d");
+
+                GroupLayout panel8Layout = new GroupLayout(panel8);
+                panel8.setLayout(panel8Layout);
+                panel8Layout.setHorizontalGroup(
+                    panel8Layout.createParallelGroup()
+                        .addGroup(panel8Layout.createSequentialGroup()
+                            .addGroup(panel8Layout.createParallelGroup()
+                                .addGroup(panel8Layout.createSequentialGroup()
+                                    .addGap(47, 47, 47)
+                                    .addGroup(panel8Layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(downloadPics, GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE)
+                                        .addComponent(exportActionData, GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE)
+                                        .addComponent(btnExportTypeFile, GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE)))
+                                .addGroup(panel8Layout.createSequentialGroup()
+                                    .addGap(100, 100, 100)
+                                    .addComponent(btnModifyFileNames)))
+                            .addContainerGap(719, Short.MAX_VALUE))
+                );
+                panel8Layout.setVerticalGroup(
+                    panel8Layout.createParallelGroup()
+                        .addGroup(panel8Layout.createSequentialGroup()
+                            .addGap(47, 47, 47)
+                            .addComponent(downloadPics)
+                            .addGap(18, 18, 18)
+                            .addComponent(exportActionData)
+                            .addGap(29, 29, 29)
+                            .addComponent(btnExportTypeFile)
+                            .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addComponent(btnModifyFileNames)
+                            .addContainerGap(383, Short.MAX_VALUE))
+                );
+            }
+            tabbedPane1.addTab("\u7edf\u8ba1\u56fe\u518c", panel8);
         }
 
         GroupLayout contentPaneLayout = new GroupLayout(contentPane);
@@ -1757,11 +1967,17 @@ System.out.print("");
     private JPanel panel7;
     private JButton out;
     private JButton tst;
+    private JPanel panel8;
+    private JButton downloadPics;
+    private JButton exportActionData;
+    private JButton btnExportTypeFile;
+    private JButton btnModifyFileNames;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 
     public static void main(String[] args) {
         // TODO Auto-generated method stub
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
 
               SwingMain swingMain=  new SwingMain();

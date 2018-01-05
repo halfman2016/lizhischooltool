@@ -201,7 +201,7 @@ public class MDBTools {
     }
 
 
-    public ArrayList<GradeClass> getGradeClasses() {
+    public List<GradeClass> getGradeClasses() {
         ArrayList<GradeClass> gradeClasses = new ArrayList<>();
         GradeClass gradeClass;
 
@@ -217,12 +217,10 @@ public class MDBTools {
             gradeClasses.add(gradeClass);
 
         }
-
-
         return gradeClasses;
     }
 
-    public ArrayList<GradeClass> getGradeClassesIsActive() {
+    public List<GradeClass> getGradeClassesIsActive() {
         ArrayList<GradeClass> gradeClasses = new ArrayList<>();
         GradeClass gradeClass;
 
@@ -295,7 +293,23 @@ public class MDBTools {
         return pinActions;
     }
 
-    public void saveGradeClasses(ArrayList<GradeClass> gradeClasses) {
+    public List<PicPinAction> getPicPinActions(){
+        List<PicPinAction> picPinActions=new ArrayList<>();
+        PicPinAction picPinAction;
+        mongoCollection=mongoDatabase.getCollection("picpinactions");
+        FindIterable<Document> iterable=mongoCollection.find();
+        MongoCursor mongoCursor=iterable.iterator();
+        Gson gson = new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+        while (mongoCursor.hasNext()) {
+            Document doc = (Document) mongoCursor.next();
+            picPinAction = gson.fromJson(doc.toJson(), PicPinAction.class);
+            picPinActions.add(picPinAction);
+        }
+
+        return picPinActions;
+    }
+
+    public void saveGradeClasses(List<GradeClass> gradeClasses) {
         //isActive false 永远不删除
         mongoCollection = mongoDatabase.getCollection("classes");
         //全部删除
@@ -523,6 +537,35 @@ public class MDBTools {
         }
         return pics;
     }
+
+    public List<Photopic> getSubjectPhotos(){
+        ArrayList<Photopic> pics=new ArrayList<>();
+        mongoCollection=mongoDatabase.getCollection("photos");
+        MongoCursor cursor=mongoCollection.find(Filters.exists("belongToSubject",true)).iterator();
+        while (cursor.hasNext())
+        {
+            Document doc=(Document)cursor.next();
+            Gson gson=new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+            Photopic pic=gson.fromJson(doc.toJson(),Photopic.class);
+            pics.add(pic);
+        }
+        return pics;
+    }
+
+    public List<Photopic> getFreePhotos(){
+        ArrayList<Photopic> pics=new ArrayList<>();
+        mongoCollection=mongoDatabase.getCollection("photos");
+        MongoCursor cursor=mongoCollection.find(Filters.exists("belongToSubject",false)).iterator();
+        while (cursor.hasNext())
+        {
+            Document doc=(Document)cursor.next();
+            Gson gson=new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+            Photopic pic=gson.fromJson(doc.toJson(),Photopic.class);
+            pics.add(pic);
+        }
+        return pics;
+    }
+
 
     public List<PicPinAction> getPicpinactions(Photopic photopic)
     {
@@ -790,11 +833,36 @@ if(doc==null)
         }
         return photopics;
     }
+    public List<Photopic> getAllPics(){
+        List<Photopic> photopics=new ArrayList<>();
+        mongoCollection=mongoDatabase.getCollection("photos");
+        MongoCursor mongoCursor=mongoCollection.find().iterator();
+        Gson gson=new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+        while (mongoCursor.hasNext())
+        {
+            Document doc= (Document) mongoCursor.next();
+            photopics.add(gson.fromJson(doc.toJson(),Photopic.class));
+        }
+        return photopics;
+
+    }
 
     public  List<DayCheckRec> getTopDaychecks(){
         List<DayCheckRec> dayCheckRecs=new ArrayList<>();
         mongoCollection=mongoDatabase.getCollection("daycommonactionRecs");
         MongoCursor mongoCursor=mongoCollection.find().sort(new BasicDBObject("strdate",-1)).limit(5).iterator();
+        Gson gson=new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
+        while (mongoCursor.hasNext())
+        {
+            Document doc= (Document) mongoCursor.next();
+            dayCheckRecs.add(gson.fromJson(doc.toJson(),DayCheckRec.class));
+        }
+        return dayCheckRecs;
+    }
+    public  List<DayCheckRec> getAllDaychecks(){
+        List<DayCheckRec> dayCheckRecs=new ArrayList<>();
+        mongoCollection=mongoDatabase.getCollection("daycommonactionRecs");
+        MongoCursor mongoCursor=mongoCollection.find().iterator();
         Gson gson=new GsonBuilder().setDateFormat("MMM d, yyyy h:mm:ss a").create();
         while (mongoCursor.hasNext())
         {
